@@ -2,6 +2,15 @@
 
 A comprehensive calculator tool for South Australian tenants to estimate lease break costs in accordance with SACAT (South Australian Civil and Administrative Tribunal) guidelines.
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Version](https://img.shields.io/badge/version-1.0.0-green.svg)
+
+## Author
+
+**Mohammed Isa**
+- GitHub: [@4mohdisa](https://github.com/4mohdisa)
+- Website: [LeaseBreak Calculator](https://github.com/4mohdisa/leasebreak-calculator)
+
 ## Overview
 
 LeaseBreak Calculator is a web-based tool designed to help South Australian tenants understand and calculate potential costs associated with breaking a residential lease early. The calculator strictly follows SACAT guidelines and CBS (Consumer and Business Services) regulations to provide accurate estimates for:
@@ -85,9 +94,27 @@ Contributions are welcome! Please ensure any changes maintain compliance with SA
 
 ## Copyright and License
 
- 2024 LeaseBreak Calculator. All rights reserved.
+ 2024 Mohammed Isa. All rights reserved.
 
-Licensed under the MIT License.
+Licensed under the MIT License. See [LICENSE](LICENSE) for more information.
+
+### Project Metadata
+
+- **Version**: 1.0.0
+- **Last Updated**: January 2024
+- **Status**: Active
+- **Language**: TypeScript/JavaScript
+- **Framework**: Next.js 14
+- **Deployment**: Vercel
+- **Dependencies**:
+  - Next.js 14.2.16
+  - React 18
+  - TypeScript
+  - Tailwind CSS
+  - shadcn/ui components
+  - next-themes
+  - date-fns
+  - lucide-react
 
 ### Data Sources
 

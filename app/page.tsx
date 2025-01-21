@@ -1,3 +1,4 @@
+import type { Metadata } from "next"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { AdvertisingFeeCalculator } from "./calculators/advertising-fee"
@@ -5,6 +6,15 @@ import { RelettingFeeCalculator } from "./calculators/reletting-fee"
 import { Masthead } from "./components/masthead"
 import { AboutSection } from "./components/about-section"
 import { QASection } from "./components/qa-section"
+
+export const metadata: Metadata = {
+  title: "Home | SACAT-Compliant Lease Break Calculator for South Australia",
+  description: "Calculate early lease termination costs in South Australia with our SACAT-compliant calculator. Get accurate estimates for reletting fees and advertising costs.",
+  openGraph: {
+    title: "Home | SACAT-Compliant Lease Break Calculator for South Australia",
+    description: "Calculate early lease termination costs in South Australia with our SACAT-compliant calculator. Get accurate estimates for reletting fees and advertising costs.",
+  },
+}
 
 export default function Home() {
   return (

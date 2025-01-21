@@ -17,9 +17,74 @@ const geistMono = localFont({
 })
 
 export const metadata: Metadata = {
-  title: "LeaseBreak Calculator",
-  description: "Calculate your lease break costs and reletting fees easily",
-  keywords: ["lease break", "calculator", "reletting fee", "rental", "property"],
+  title: {
+    default: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
+    template: "%s | LeaseBreak Calculator"
+  },
+  description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas. Get instant estimates for advertising costs and maximum rent liability periods.",
+  keywords: [
+    "lease break calculator",
+    "SACAT calculator",
+    "reletting fee",
+    "rental property",
+    "lease termination",
+    "South Australia",
+    "tenancy calculator",
+    "break lease costs",
+    "advertising fees",
+    "rent liability"
+  ],
+  authors: [{ name: "Mohammed Isa", url: "https://github.com/4mohdisa" }],
+  creator: "Mohammed Isa",
+  publisher: "Mohammed Isa",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL("https://github.com/4mohdisa/leasebreak-calculator"),
+  openGraph: {
+    type: "website",
+    locale: "en_AU",
+    url: "https://github.com/4mohdisa/leasebreak-calculator",
+    title: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
+    description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas. Get instant estimates for advertising costs and maximum rent liability periods.",
+    siteName: "LeaseBreak Calculator",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "LeaseBreak Calculator - SACAT-Compliant Lease Break Cost Calculator"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
+    description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas.",
+    creator: "@4mohdisa",
+    images: ["/og-image.png"]
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "verification_token",
+  },
 }
 
 export default function RootLayout({
