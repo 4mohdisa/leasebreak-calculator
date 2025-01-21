@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
 import { useForm } from "react-hook-form"
+import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "@radix-ui/react-icons"
+import { RootState } from "@/lib/redux/store"
+import { updateRelettingFee } from "@/lib/redux/calculatorSlice"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -23,17 +25,16 @@ const TERM_OPTIONS = [
 ]
 
 export function RelettingFeeCalculator() {
-  const [useDates, setUseDates] = useState(false)
-  const [term, setTerm] = useState<number>(52) // Default to 1 year
-  const [baseWeeklyRent, setBaseWeeklyRent] = useState<string>("")
-  const [weeksRemaining, setWeeksRemaining] = useState<string>("")
-  const [moveOutDate, setMoveOutDate] = useState<Date>()
-  const [agreementEndDate, setAgreementEndDate] = useState<Date>()
-  const [calculatedFee, setCalculatedFee] = useState<{
-    weeklyRentWithGST: number;
-    maximumRelettingFee: number;
-  } | null>(null)
-
+  const dispatch = useDispatch()
+  const {
+    useDates,
+    baseWeeklyRent,
+    weeksRemaining,
+    moveOutDate,
+    agreementEndDate,
+    calculatedFee
+  } = useSelector((state: RootState) => state.calculator.relettingFee)
+  
   const form = useForm()
 
   const calculateWeeksRemaining = (moveOut: Date, endDate: Date) => {
@@ -51,12 +52,24 @@ export function RelettingFeeCalculator() {
 
     const gstAmount = baseRent * 0.10
     const weeklyRentWithGST = baseRent + gstAmount
-    const maximumRelettingFee = weeklyRentWithGST * 2
 
-    setCalculatedFee({
-      weeklyRentWithGST: Math.round(weeklyRentWithGST * 100) / 100,
-      maximumRelettingFee: Math.round(maximumRelettingFee * 100) / 100
-    })
+    const remainingWeeks = useDates && moveOutDate && agreementEndDate
+      ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
+      : parseFloat(weeksRemaining)
+
+    if (isNaN(remainingWeeks)) {
+      return
+    }
+
+    const maximumWeeks = Math.min(remainingWeeks, 6)
+    const maximumRelettingFee = weeklyRentWithGST * maximumWeeks
+
+    dispatch(updateRelettingFee({
+      calculatedFee: {
+        weeklyRentWithGST: Math.round(weeklyRentWithGST * 100) / 100,
+        maximumRelettingFee: Math.round(maximumRelettingFee * 100) / 100
+      }
+    }))
   }
 
   return (
@@ -75,7 +88,7 @@ export function RelettingFeeCalculator() {
               <Input
                 type="number"
                 value={baseWeeklyRent}
-                onChange={(e) => setBaseWeeklyRent(e.target.value)}
+                onChange={(e) => dispatch(updateRelettingFee({ baseWeeklyRent: e.target.value }))}
                 placeholder="Enter base weekly rent"
               />
             </div>
@@ -83,7 +96,7 @@ export function RelettingFeeCalculator() {
             <div>
               <Label>Agreed Term</Label>
               <Select 
-                onValueChange={(value) => setTerm(parseInt(value))}
+                onValueChange={(value) => dispatch(updateRelettingFee({ weeksRemaining: value }))}
                 defaultValue="52"
               >
                 <SelectTrigger>
@@ -102,25 +115,15 @@ export function RelettingFeeCalculator() {
             <div className="flex items-center space-x-2">
               <Switch
                 checked={useDates}
-                onCheckedChange={setUseDates}
+                onCheckedChange={(checked) => dispatch(updateRelettingFee({ useDates: checked }))}
               />
               <Label>Use dates instead of weeks</Label>
             </div>
 
-            {!useDates ? (
-              <div>
-                <Label>Weeks Remaining</Label>
-                <Input
-                  type="number"
-                  value={weeksRemaining}
-                  onChange={(e) => setWeeksRemaining(e.target.value)}
-                  placeholder="Enter weeks remaining"
-                />
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label>Move-Out Date</Label>
+            {useDates ? (
+              <div className="space-y-4">
+                <div className="flex flex-col space-y-2">
+                  <Label>Move Out Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -131,21 +134,19 @@ export function RelettingFeeCalculator() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {moveOutDate ? format(moveOutDate, "PPP") : "Pick a date"}
+                        {moveOutDate ? format(new Date(moveOutDate), "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={moveOutDate}
-                        onSelect={setMoveOutDate}
-                        initialFocus
+                        selected={moveOutDate ? new Date(moveOutDate) : undefined}
+                        onSelect={(date) => dispatch(updateRelettingFee({ moveOutDate: date?.toISOString() || null }))}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
-                
-                <div className="grid gap-2">
+                <div className="flex flex-col space-y-2">
                   <Label>Agreement End Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -157,19 +158,28 @@ export function RelettingFeeCalculator() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {agreementEndDate ? format(agreementEndDate, "PPP") : "Pick a date"}
+                        {agreementEndDate ? format(new Date(agreementEndDate), "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={agreementEndDate}
-                        onSelect={setAgreementEndDate}
-                        initialFocus
+                        selected={agreementEndDate ? new Date(agreementEndDate) : undefined}
+                        onSelect={(date) => dispatch(updateRelettingFee({ agreementEndDate: date?.toISOString() || null }))}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Label>Weeks Remaining</Label>
+                <Input
+                  type="number"
+                  value={weeksRemaining}
+                  onChange={(e) => dispatch(updateRelettingFee({ weeksRemaining: e.target.value }))}
+                  placeholder="Enter weeks remaining"
+                />
               </div>
             )}
 

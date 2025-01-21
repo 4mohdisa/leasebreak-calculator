@@ -39,7 +39,7 @@ export function Masthead() {
             <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
               <h3 className="text-xl font-bold">Reletting Fee Calculator</h3>
               <p className="text-muted-foreground">
-                Calculate your reletting fee based on weekly rent, GST, and remaining lease term using SACAT's official formula
+                Calculate your reletting fee based on weekly rent, GST, and remaining lease term using SACAT&apos;s official formula
               </p>
             </div>
             <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
@@ -51,7 +51,7 @@ export function Masthead() {
             <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
               <h3 className="text-xl font-bold">SACAT Compliance</h3>
               <p className="text-muted-foreground">
-                All calculations follow the South Australian Civil and Administrative Tribunal's prescribed formulas and guidelines
+                All calculations follow the South Australian Civil and Administrative Tribunal&apos;s prescribed formulas and guidelines
               </p>
             </div>
           </div>

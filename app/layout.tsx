@@ -3,6 +3,7 @@ import localFont from "next/font/local"
 import { Navbar } from "./components/navbar"
 import { Footer } from "./components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
+import { ReduxProvider } from "@/lib/redux/provider"
 import "./globals.css"
 
 const geistSans = localFont({
@@ -15,6 +16,13 @@ const geistMono = localFont({
   variable: "--font-geist-mono",
   weight: "100 900",
 })
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+}
 
 export const metadata: Metadata = {
   title: {
@@ -66,11 +74,6 @@ export const metadata: Metadata = {
     creator: "@4mohdisa",
     images: ["/og-image.png"]
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
   robots: {
     index: true,
     follow: true,
@@ -103,11 +106,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-screen flex-col">
-            <Navbar />
-            <main className="flex-1">{children}</main>
-            <Footer />
-          </div>
+          <ReduxProvider>
+            <div className="relative flex min-h-screen flex-col">
+              <Navbar />
+              <main className="flex-1">{children}</main>
+              <Footer />
+            </div>
+          </ReduxProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -3,30 +3,13 @@
 import * as React from "react"
 import Link from "next/link"
 import { ThemeToggle } from "@/components/theme-toggle"
-
-import { cn } from "@/lib/utils"
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
-  NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu"
-
-const calculators: { title: string; href: string; description: string }[] = [
-  {
-    title: "Reletting Fee",
-    href: "/calculators/reletting-fee",
-    description: "Calculate the reletting fee for breaking your lease early.",
-  },
-  {
-    title: "Break Lease Cost",
-    href: "/calculators/break-lease",
-    description: "Estimate the total cost of breaking your lease agreement.",
-  },
-]
 
 export function Navbar() {
   return (

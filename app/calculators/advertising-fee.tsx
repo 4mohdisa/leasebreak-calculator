@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { useDispatch, useSelector } from 'react-redux'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
@@ -13,6 +14,8 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "@radix-ui/react-icons"
+import { RootState } from "@/lib/redux/store"
+import { updateAdvertisingFee } from "@/lib/redux/calculatorSlice"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -22,13 +25,18 @@ const TERM_OPTIONS = [
 ]
 
 export function AdvertisingFeeCalculator() {
-  const [useDates, setUseDates] = useState(false)
-  const [term, setTerm] = useState<number>(52) // Default to 1 year
-  const [advertisingCost, setAdvertisingCost] = useState<string>("")
-  const [weeksRemaining, setWeeksRemaining] = useState<string>("")
-  const [moveOutDate, setMoveOutDate] = useState<Date>()
-  const [agreementEndDate, setAgreementEndDate] = useState<Date>()
-  const [calculatedFee, setCalculatedFee] = useState<number | null>(null)
+  const dispatch = useDispatch()
+  const {
+    useDates,
+    term,
+    advertisingCost,
+    weeksRemaining,
+    moveOutDate,
+    agreementEndDate,
+    calculatedFee
+  } = useSelector((state: RootState) => state.calculator.advertisingFee)
+  
+  const form = useForm()
 
   const calculateWeeksRemaining = (moveOut: Date, endDate: Date) => {
     const diffTime = Math.abs(endDate.getTime() - moveOut.getTime())
@@ -39,7 +47,7 @@ export function AdvertisingFeeCalculator() {
   const calculateFee = () => {
     const threeQuartersOfTermWeeks = Math.round(term * 0.75)
     const remainingWeeks = useDates && moveOutDate && agreementEndDate
-      ? calculateWeeksRemaining(moveOutDate, agreementEndDate)
+      ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
       : parseFloat(weeksRemaining)
     
     const adCost = parseFloat(advertisingCost)
@@ -48,9 +56,11 @@ export function AdvertisingFeeCalculator() {
       return
     }
 
-    const totalAdvertisingCostForRemainingWeeks = adCost * remainingWeeks
-    const finalFee = totalAdvertisingCostForRemainingWeeks / threeQuartersOfTermWeeks
-    setCalculatedFee(Math.round(finalFee * 100) / 100)
+    const fee = remainingWeeks <= threeQuartersOfTermWeeks
+      ? adCost
+      : adCost * (remainingWeeks / term)
+
+    dispatch(updateAdvertisingFee({ calculatedFee: Math.round(fee * 100) / 100 }))
   }
 
   return (
@@ -62,13 +72,13 @@ export function AdvertisingFeeCalculator() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <Form>
+        <Form {...form}>
           <div className="space-y-4">
             <div>
               <Label>Agreed Term</Label>
               <Select 
-                onValueChange={(value) => setTerm(parseInt(value))}
-                defaultValue="52"
+                onValueChange={(value) => dispatch(updateAdvertisingFee({ term: parseInt(value) }))}
+                defaultValue={term.toString()}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select term length" />
@@ -88,7 +98,7 @@ export function AdvertisingFeeCalculator() {
               <Input
                 type="number"
                 value={advertisingCost}
-                onChange={(e) => setAdvertisingCost(e.target.value)}
+                onChange={(e) => dispatch(updateAdvertisingFee({ advertisingCost: e.target.value }))}
                 placeholder="Enter advertising cost"
               />
             </div>
@@ -96,25 +106,15 @@ export function AdvertisingFeeCalculator() {
             <div className="flex items-center space-x-2">
               <Switch
                 checked={useDates}
-                onCheckedChange={setUseDates}
+                onCheckedChange={(checked) => dispatch(updateAdvertisingFee({ useDates: checked }))}
               />
               <Label>Use dates instead of weeks</Label>
             </div>
 
-            {!useDates ? (
-              <div>
-                <Label>Weeks Remaining</Label>
-                <Input
-                  type="number"
-                  value={weeksRemaining}
-                  onChange={(e) => setWeeksRemaining(e.target.value)}
-                  placeholder="Enter weeks remaining"
-                />
-              </div>
-            ) : (
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label>Move-Out Date</Label>
+            {useDates ? (
+              <div className="space-y-4">
+                <div className="flex flex-col space-y-2">
+                  <Label>Move Out Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button
@@ -125,21 +125,19 @@ export function AdvertisingFeeCalculator() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {moveOutDate ? format(moveOutDate, "PPP") : "Pick a date"}
+                        {moveOutDate ? format(new Date(moveOutDate), "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={moveOutDate}
-                        onSelect={setMoveOutDate}
-                        initialFocus
+                        selected={moveOutDate ? new Date(moveOutDate) : undefined}
+                        onSelect={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() || null }))}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
-                
-                <div className="grid gap-2">
+                <div className="flex flex-col space-y-2">
                   <Label>Agreement End Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -151,19 +149,28 @@ export function AdvertisingFeeCalculator() {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {agreementEndDate ? format(agreementEndDate, "PPP") : "Pick a date"}
+                        {agreementEndDate ? format(new Date(agreementEndDate), "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
                       <Calendar
                         mode="single"
-                        selected={agreementEndDate}
-                        onSelect={setAgreementEndDate}
-                        initialFocus
+                        selected={agreementEndDate ? new Date(agreementEndDate) : undefined}
+                        onSelect={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() || null }))}
                       />
                     </PopoverContent>
                   </Popover>
                 </div>
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Label>Weeks Remaining</Label>
+                <Input
+                  type="number"
+                  value={weeksRemaining}
+                  onChange={(e) => dispatch(updateAdvertisingFee({ weeksRemaining: e.target.value }))}
+                  placeholder="Enter weeks remaining"
+                />
               </div>
             )}
 
