@@ -36,19 +36,19 @@ export function Masthead() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 md:mt-24 w-full">
-            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
+            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 bg-card">
               <h3 className="text-xl font-bold">Reletting Fee Calculator</h3>
               <p className="text-muted-foreground">
                 Calculate your reletting fee based on weekly rent, GST, and remaining lease term using SACAT&apos;s official formula
               </p>
             </div>
-            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
+            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 bg-card">
               <h3 className="text-xl font-bold">Advertising Cost Calculator</h3>
               <p className="text-muted-foreground">
                 Determine your share of advertising costs based on your remaining lease term and total advertising expenses
               </p>
             </div>
-            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 dark:border-gray-800 bg-card">
+            <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 bg-card">
               <h3 className="text-xl font-bold">SACAT Compliance</h3>
               <p className="text-muted-foreground">
                 All calculations follow the South Australian Civil and Administrative Tribunal&apos;s prescribed formulas and guidelines

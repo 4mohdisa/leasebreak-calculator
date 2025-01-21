@@ -58,7 +58,7 @@ export function AboutSection() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((feature) => (
-            <Card key={feature.title} className="h-full dark:bg-[hsl(var(--background))] dark:border-slate-700">
+            <Card key={feature.title} className="h-full dark:bg-[hsl(var(--background))]">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3">
                   <feature.icon className="h-6 w-6 text-primary" />
