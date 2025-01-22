@@ -39,9 +39,23 @@ export function AdvertisingFeeCalculator() {
   const form = useForm()
 
   const calculateWeeksRemaining = (moveOut: Date, endDate: Date) => {
-    const diffTime = Math.abs(endDate.getTime() - moveOut.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return Math.round(diffDays / 7)
+    // Validate dates
+    if (moveOut > endDate) {
+      throw new Error("Move out date cannot be after end date")
+    }
+    
+    // Get the difference in milliseconds
+    const diffTime = endDate.getTime() - moveOut.getTime()
+    
+    // Convert to days
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    // Calculate complete weeks and remaining days
+    const completeWeeks = Math.floor(diffDays / 7)
+    const remainingDays = diffDays % 7
+    
+    // Add an extra week if remaining days are 4 or more
+    return remainingDays >= 4 ? completeWeeks + 1 : completeWeeks
   }
 
   const calculateFee = () => {
@@ -111,67 +125,78 @@ export function AdvertisingFeeCalculator() {
             </div>
 
             {useDates ? (
-              <div className="space-y-4">
-                <div className="flex flex-col space-y-2">
-                  <Label>Move Out Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !moveOutDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {moveOutDate ? format(new Date(moveOutDate), "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={moveOutDate ? new Date(moveOutDate) : undefined}
-                        onSelect={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() || null }))}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-                <div className="flex flex-col space-y-2">
-                  <Label>Agreement End Date</Label>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !agreementEndDate && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {agreementEndDate ? format(new Date(agreementEndDate), "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={agreementEndDate ? new Date(agreementEndDate) : undefined}
-                        onSelect={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() || null }))}
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-            ) : (
-              <div className="flex flex-col space-y-2">
-                <Label>Weeks Remaining</Label>
-                <Input
-                  type="number"
-                  value={weeksRemaining}
-                  onChange={(e) => dispatch(updateAdvertisingFee({ weeksRemaining: e.target.value }))}
-                  placeholder="Enter weeks remaining"
-                />
-              </div>
+  <div className="space-y-4">
+    <div className="flex flex-col space-y-2">
+      <Label>Move Out Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !moveOutDate && "text-muted-foreground"
             )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {moveOutDate ? format(new Date(moveOutDate), "PPP") : <span>Pick a date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={moveOutDate ? new Date(moveOutDate) : undefined}
+            onSelect={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() || null }))}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+    <div className="flex flex-col space-y-2">
+      <Label>Agreement End Date</Label>
+      <Popover>
+        <PopoverTrigger asChild>
+          <Button
+            variant={"outline"}
+            className={cn(
+              "w-full justify-start text-left font-normal",
+              !agreementEndDate && "text-muted-foreground"
+            )}
+          >
+            <CalendarIcon className="mr-2 h-4 w-4" />
+            {agreementEndDate ? format(new Date(agreementEndDate), "PPP") : <span>Pick a date</span>}
+          </Button>
+        </PopoverTrigger>
+        <PopoverContent className="w-auto p-0">
+          <Calendar
+            mode="single"
+            selected={agreementEndDate ? new Date(agreementEndDate) : undefined}
+            onSelect={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() || null }))}
+          />
+        </PopoverContent>
+      </Popover>
+    </div>
+    {/* Display calculated weeks if both dates are selected */}
+    {moveOutDate && agreementEndDate && (
+      <div className="mt-2 text-sm text-muted-foreground">
+        <p>
+          Calculated weeks remaining:{' '}
+          <span className="font-medium">
+            {calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))}
+          </span>
+        </p>
+      </div>
+    )}
+  </div>
+) : (
+  <div className="flex flex-col space-y-2">
+    <Label>Weeks Remaining</Label>
+    <Input
+      type="number"
+      value={weeksRemaining}
+      onChange={(e) => dispatch(updateAdvertisingFee({ weeksRemaining: e.target.value }))}
+      placeholder="Enter weeks remaining"
+    />
+  </div>
+)}
 
             <Button onClick={calculateFee} type="button">
               Calculate Fee
