@@ -13,6 +13,7 @@ interface CalculatorState {
   relettingFee: {
     useDates: boolean
     baseWeeklyRent: string
+    term: number  
     weeksRemaining: string
     moveOutDate: string | null
     agreementEndDate: string | null
