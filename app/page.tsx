@@ -6,6 +6,8 @@ import { RelettingFeeCalculator } from "./calculators/reletting-fee"
 import { Masthead } from "./components/masthead"
 import { AboutSection } from "./components/about-section"
 import { QASection } from "./components/qa-section"
+import { AboutMeSection } from "./components/about-me-section"
+import { BuyMeCoffee } from "./components/buy-me-coffee"
 
 export const metadata: Metadata = {
   title: "Home | SACAT-Compliant Lease Break Calculator for South Australia",
@@ -22,11 +24,11 @@ export default function Home() {
       <Masthead />
       <main className="flex-grow">
         {/* Calculator Section */}
-        <section 
-          className="w-full py-12 md:py-20" 
+        <section
+          className="w-full py-12 md:py-20"
           id="calculator"
         >
-          <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+          <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8" id="leasebreakcalculator">
             <div className="flex flex-col items-center justify-center mx-auto max-w-3xl space-y-8 text-center">
               <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl">
                 Lease Break Calculators
@@ -35,7 +37,7 @@ export default function Home() {
                 Use our calculators to estimate your reletting fee or advertising costs when breaking a lease.
               </p>
             </div>
-            
+
             {/* Calculator Card */}
             <div className="mt-8 flex justify-center">
               <Card className="w-full max-w-3xl mx-auto">
@@ -65,6 +67,11 @@ export default function Home() {
           <AboutSection />
           <QASection />
         </div>
+
+        <div className="container mx-auto max-w-[1200px] px-4 sm:px-6 lg:px-8">
+          <AboutMeSection />
+        </div>
+        <BuyMeCoffee />
       </main>
     </div>
   )

@@ -7,16 +7,13 @@ import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
-import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { format } from "date-fns"
-import { Calendar } from "@/components/ui/calendar"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { CalendarIcon } from "@radix-ui/react-icons"
+import { DateInput } from "@/app/components/date-input"
 import { RootState } from "@/lib/redux/store"
 import { updateAdvertisingFee } from "@/lib/redux/calculatorSlice"
 import { event as gaEvent } from '@/lib/gtag'
+import { calculateWeeksRemaining } from '@/lib/helpers/date-helpers'
+import { Button } from "react-day-picker"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -27,37 +24,17 @@ const TERM_OPTIONS = [
 
 export function AdvertisingFeeCalculator() {
   const dispatch = useDispatch()
+  const form = useForm()
+
   const {
     useDates,
-    term,
     advertisingCost,
+    term,
     weeksRemaining,
     moveOutDate,
     agreementEndDate,
     calculatedFee
   } = useSelector((state: RootState) => state.calculator.advertisingFee)
-  
-  const form = useForm()
-
-  const calculateWeeksRemaining = (moveOut: Date, endDate: Date) => {
-    // Validate dates
-    if (moveOut > endDate) {
-      throw new Error("Move out date cannot be after end date")
-    }
-    
-    // Get the difference in milliseconds
-    const diffTime = endDate.getTime() - moveOut.getTime()
-    
-    // Convert to days
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
-    
-    // Calculate complete weeks and remaining days
-    const completeWeeks = Math.floor(diffDays / 7)
-    const remainingDays = diffDays % 7
-    
-    // Add an extra week if remaining days are 4 or more
-    return remainingDays >= 4 ? completeWeeks + 1 : completeWeeks
-  }
 
   const calculateFee = () => {
     const threeQuartersOfTermWeeks = Math.round(term * 0.75)
@@ -134,78 +111,42 @@ export function AdvertisingFeeCalculator() {
             </div>
 
             {useDates ? (
-  <div className="space-y-4">
-    <div className="flex flex-col space-y-2">
-      <Label>Move Out Date</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !moveOutDate && "text-muted-foreground"
+              <div className="space-y-4">
+                <div className="flex flex-col space-y-2">
+                  <Label>Move Out Date</Label>
+                  <DateInput
+                    value={moveOutDate ? new Date(moveOutDate) : null}
+                    onChange={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() ?? null }))} label={""}                  />
+                </div>
+                <div className="flex flex-col space-y-2">
+                  <Label>Agreement End Date</Label>
+                  <DateInput
+                    value={agreementEndDate ? new Date(agreementEndDate) : null}
+                    onChange={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() ?? null }))} label={""}                  />
+                </div>
+                {/* Display calculated weeks if both dates are selected */}
+                {moveOutDate && agreementEndDate && (
+                  <div className="rounded-md bg-muted px-3 py-2">
+                    <p className="text-sm">
+                      Calculated weeks remaining:{' '}
+                      <span className="font-medium">
+                        {moveOutDate && agreementEndDate ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate)) : 0}
+                      </span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="flex flex-col space-y-2">
+                <Label>Weeks Remaining</Label>
+                <Input
+                  type="number"
+                  value={weeksRemaining}
+                  onChange={(e) => dispatch(updateAdvertisingFee({ weeksRemaining: e.target.value }))}
+                  placeholder="Enter weeks remaining"
+                />
+              </div>
             )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {moveOutDate ? format(new Date(moveOutDate), "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={moveOutDate ? new Date(moveOutDate) : undefined}
-            onSelect={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() || null }))}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-    <div className="flex flex-col space-y-2">
-      <Label>Agreement End Date</Label>
-      <Popover>
-        <PopoverTrigger asChild>
-          <Button
-            variant={"outline"}
-            className={cn(
-              "w-full justify-start text-left font-normal",
-              !agreementEndDate && "text-muted-foreground"
-            )}
-          >
-            <CalendarIcon className="mr-2 h-4 w-4" />
-            {agreementEndDate ? format(new Date(agreementEndDate), "PPP") : <span>Pick a date</span>}
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-auto p-0">
-          <Calendar
-            mode="single"
-            selected={agreementEndDate ? new Date(agreementEndDate) : undefined}
-            onSelect={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() || null }))}
-          />
-        </PopoverContent>
-      </Popover>
-    </div>
-    {/* Display calculated weeks if both dates are selected */}
-    {moveOutDate && agreementEndDate && (
-      <div className="mt-2 text-sm text-muted-foreground">
-        <p>
-          Calculated weeks remaining:{' '}
-          <span className="font-medium">
-            {calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))}
-          </span>
-        </p>
-      </div>
-    )}
-  </div>
-) : (
-  <div className="flex flex-col space-y-2">
-    <Label>Weeks Remaining</Label>
-    <Input
-      type="number"
-      value={weeksRemaining}
-      onChange={(e) => dispatch(updateAdvertisingFee({ weeksRemaining: e.target.value }))}
-      placeholder="Enter weeks remaining"
-    />
-  </div>
-)}
 
             <Button onClick={calculateFee} type="button">
               Calculate Fee

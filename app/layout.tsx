@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, Viewport } from "next"
 import localFont from "next/font/local"
 import { Navbar } from "./components/navbar"
 import { Footer } from "./components/footer"
@@ -7,6 +7,8 @@ import { ReduxProvider } from "@/lib/redux/provider"
 import "./globals.css"
 import { Analytics } from "@vercel/analytics/react"
 import GoogleAnalytics from "./components/GoogleAnalytics"
+import { ContactSection } from "./components/contact-section"
+import { generateCalculatorSchema, generateOrganizationSchema } from '@/lib/schema'
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -19,7 +21,7 @@ const geistMono = localFont({
   weight: "100 900",
 })
 
-export const viewport = {
+export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -27,54 +29,47 @@ export const viewport = {
 }
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://leasebreak-calculator.vercel.app'),
   title: {
-    default: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
-    template: "%s | LeaseBreak Calculator"
+    default: 'SACAT-Compliant Lease Break Calculator | South Australia',
+    template: '%s | LeaseBreak Calculator SA'
   },
-  description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas. Get instant estimates for advertising costs and maximum rent liability periods.",
-  keywords: [
-    "lease break calculator",
-    "SACAT calculator",
-    "reletting fee",
-    "rental property",
-    "lease termination",
-    "South Australia",
-    "tenancy calculator",
-    "break lease costs",
-    "advertising fees",
-    "rent liability"
-  ],
-  authors: [{ name: "Mohammed Isa", url: "https://github.com/4mohdisa" }],
-  creator: "Mohammed Isa",
-  publisher: "Mohammed Isa",
+  description: 'Free calculator for estimating lease break costs in South Australia. SACAT-compliant calculations for reletting fees and advertising costs. Trusted by tenants and property managers.',
+  keywords: ['lease break calculator', 'SACAT', 'South Australia', 'reletting fee', 'advertising costs', 'rental agreement', 'tenancy', 'break lease', 'rental bond', 'Adelaide'],
+  authors: [{ name: 'LeaseBreak Calculator' }],
+  creator: 'LeaseBreak Calculator',
+  publisher: 'LeaseBreak Calculator',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL("https://github.com/4mohdisa/leasebreak-calculator"),
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/icon-512x512.png',
+    apple: '/icon-192x192.png',
+  },
   openGraph: {
-    type: "website",
-    locale: "en_AU",
-    url: "https://github.com/4mohdisa/leasebreak-calculator",
-    title: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
-    description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas. Get instant estimates for advertising costs and maximum rent liability periods.",
-    siteName: "LeaseBreak Calculator",
+    type: 'website',
+    locale: 'en_AU',
+    url: 'https://leasebreak-calculator.vercel.app',
+    title: 'SACAT-Compliant Lease Break Calculator | South Australia',
+    description: 'Free calculator for estimating lease break costs in South Australia. SACAT-compliant calculations for reletting fees and advertising costs. Trusted by tenants and property managers.',
+    siteName: 'LeaseBreak Calculator SA',
     images: [
       {
-        url: "/og-image.png",
+        url: '/og-image.png',
         width: 1200,
         height: 630,
-        alt: "LeaseBreak Calculator - SACAT-Compliant Lease Break Cost Calculator"
+        alt: 'LeaseBreak Calculator SA'
       }
     ]
   },
   twitter: {
-    card: "summary_large_image",
-    title: "LeaseBreak Calculator | SACAT-Compliant Lease Break Cost Calculator",
-    description: "Calculate your South Australian lease break costs and reletting fees accurately using SACAT-compliant formulas.",
-    creator: "@4mohdisa",
-    images: ["/og-image.png"]
+    card: 'summary_large_image',
+    title: 'SACAT-Compliant Lease Break Calculator | South Australia',
+    description: 'Free calculator for estimating lease break costs in South Australia. SACAT-compliant calculations for reletting fees and advertising costs.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -82,26 +77,38 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
-  verification: {
-    google: "verification_token",
-  },
+  alternates: {
+    canonical: 'https://leasebreak-calculator.vercel.app'
+  }
 }
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
 
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-      <GoogleAnalytics GA_MEASUREMENT_ID="G-JZ4HSH1P8X" />
+        <GoogleAnalytics GA_MEASUREMENT_ID="G-JZ4HSH1P8X" />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateCalculatorSchema())
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(generateOrganizationSchema())
+          }}
+        />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
@@ -116,9 +123,10 @@ export default function RootLayout({
             <div className="relative flex min-h-screen flex-col">
               <Navbar />
               <main className="flex-1">
-              {children}
-              <Analytics />
+                {children}
+                <Analytics />
               </main>
+              <ContactSection />
               <Footer />
             </div>
           </ReduxProvider>

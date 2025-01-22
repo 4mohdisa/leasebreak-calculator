@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="1200" height="630" viewBox="0 0 1200 630" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#000000"/>
+  
+  <!-- Calculator Icon -->
+  <g transform="translate(100, 165) scale(0.6)">
+    <rect width="512" height="512" rx="100" fill="#FFFFFF"/>
+    <rect x="96" y="64" width="320" height="384" rx="32" fill="#000000"/>
+    <rect x="128" y="96" width="256" height="80" rx="8" fill="#E2E8F0"/>
+    <path d="M256 208 L384 336" stroke="#FF0000" stroke-width="24" stroke-linecap="round"/>
+    <path d="M128 336 L256 208" stroke="#FF0000" stroke-width="24" stroke-linecap="round"/>
+    <text x="256" y="300" font-family="Arial" font-size="160" fill="#FFFFFF" text-anchor="middle" dominant-baseline="middle">$</text>
+  </g>
+  
+  <!-- Text -->
+  <text x="520" y="250" font-family="Arial" font-size="72" font-weight="bold" fill="#FFFFFF" text-anchor="start">
+    LeaseBreak Calculator
+  </text>
+  <text x="520" y="350" font-family="Arial" font-size="36" fill="#FFFFFF" text-anchor="start">
+    SACAT-Compliant Lease Break Cost Calculator
+  </text>
+  <text x="520" y="420" font-family="Arial" font-size="28" fill="#808080" text-anchor="start">
+    Calculate reletting fees and advertising costs
+  </text>
+  <text x="520" y="460" font-family="Arial" font-size="28" fill="#808080" text-anchor="start">
+    for South Australian rental properties
+  </text>
+</svg>
