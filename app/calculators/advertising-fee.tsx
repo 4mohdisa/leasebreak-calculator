@@ -55,11 +55,10 @@ export function AdvertisingFeeCalculator() {
     if (isNaN(adCost) || isNaN(remainingWeeks)) {
       return
     }
-
-    const fee = remainingWeeks <= threeQuartersOfTermWeeks
-      ? adCost
-      : adCost * (remainingWeeks / term)
-
+  
+    // Apply official formula
+    const fee = (adCost * remainingWeeks) / threeQuartersOfTermWeeks
+  
     dispatch(updateAdvertisingFee({ calculatedFee: Math.round(fee * 100) / 100 }))
   }
 

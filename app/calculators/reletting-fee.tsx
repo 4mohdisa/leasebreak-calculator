@@ -38,9 +38,19 @@ export function RelettingFeeCalculator() {
   const form = useForm()
 
   const calculateWeeksRemaining = (moveOut: Date, endDate: Date) => {
-    const diffTime = Math.abs(endDate.getTime() - moveOut.getTime())
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return Math.round(diffDays / 7)
+    // Validate dates
+    if (moveOut > endDate) {
+      throw new Error("Move out date cannot be after end date")
+    }
+    
+    // Get the difference in milliseconds
+    const diffTime = endDate.getTime() - moveOut.getTime()
+    
+    // Convert to days and floor to nearest integer
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+    
+    // Convert to weeks and floor again
+    return Math.floor(diffDays / 7)
   }
 
   const calculateFee = () => {
@@ -49,25 +59,33 @@ export function RelettingFeeCalculator() {
     if (isNaN(baseRent)) {
       return
     }
-
+  
+    // 1. Calculate weekly rent with GST
     const gstAmount = baseRent * 0.10
     const weeklyRentWithGST = baseRent + gstAmount
-
+  
+    // 2. Calculate maximum reletting fee (2 weeks rent with GST)
+    const twoWeeksRentWithGST = weeklyRentWithGST * 2
+  
     const remainingWeeks = useDates && moveOutDate && agreementEndDate
       ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
       : parseFloat(weeksRemaining)
-
+  
     if (isNaN(remainingWeeks)) {
       return
     }
-
-    const maximumWeeks = Math.min(remainingWeeks, 6)
-    const maximumRelettingFee = weeklyRentWithGST * maximumWeeks
-
+  
+    // Get term weeks from selected term
+    const termWeeks = parseInt(term)
+    const threeQuartersTerm = Math.round(termWeeks * 0.75)
+  
+    // 3 & 4. Apply the formula: (2 weeks rent × remaining weeks) ÷ (3/4 term)
+    const relettingFee = (twoWeeksRentWithGST * remainingWeeks) / threeQuartersTerm
+  
     dispatch(updateRelettingFee({
       calculatedFee: {
         weeklyRentWithGST: Math.round(weeklyRentWithGST * 100) / 100,
-        maximumRelettingFee: Math.round(maximumRelettingFee * 100) / 100
+        maximumRelettingFee: Math.round(relettingFee * 100) / 100
       }
     }))
   }
