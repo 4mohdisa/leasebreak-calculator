@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Twitter, Github, Linkedin } from "lucide-react"
+import { X, Github, Linkedin } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
@@ -52,17 +52,17 @@ export function Footer() {
 
           <div className="flex items-center justify-center gap-4">
             <Button variant="ghost" size="icon" asChild>
-              <a href="https://twitter.com/isaxcode" target="_blank" rel="noreferrer" aria-label="Twitter">
-                <Twitter className="h-4 w-4" />
+              <a href="https://twitter.com/4mohdisa" target="_blank" rel="noreferrer" aria-label="Twitter">
+                <X className="h-4 w-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <a href="https://github.com/isaxcode" target="_blank" rel="noreferrer" aria-label="GitHub">
+              <a href="https://github.com/4mohdisa" target="_blank" rel="noreferrer" aria-label="GitHub">
                 <Github className="h-4 w-4" />
               </a>
             </Button>
             <Button variant="ghost" size="icon" asChild>
-              <a href="https://linkedin.com/in/isaxcode" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+              <a href="https://linkedin.com/in/4mohdisa" target="_blank" rel="noreferrer" aria-label="LinkedIn">
                 <Linkedin className="h-4 w-4" />
               </a>
             </Button>
