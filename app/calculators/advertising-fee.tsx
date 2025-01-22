@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { RootState } from "@/lib/redux/store"
 import { updateAdvertisingFee } from "@/lib/redux/calculatorSlice"
+import { event as gaEvent } from '@/lib/gtag'
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -72,6 +73,14 @@ export function AdvertisingFeeCalculator() {
   
     // Apply official formula
     const fee = (adCost * remainingWeeks) / threeQuartersOfTermWeeks
+
+  // Track the calculation event
+  gaEvent({
+    action: 'calculate',
+    category: 'advertising_fee',
+    label: `Term: ${term} weeks, Cost: ${adCost}, Weeks Remaining: ${remainingWeeks}`,
+    value: Math.round(fee * 100) / 100
+  })
   
     dispatch(updateAdvertisingFee({ calculatedFee: Math.round(fee * 100) / 100 }))
   }

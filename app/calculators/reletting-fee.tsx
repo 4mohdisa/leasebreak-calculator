@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils"
 import { CalendarIcon } from "@radix-ui/react-icons"
 import { RootState } from "@/lib/redux/store"
 import { updateRelettingFee } from "@/lib/redux/calculatorSlice"
+import { event as gaEvent } from '@/lib/gtag'
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -25,6 +26,7 @@ const TERM_OPTIONS = [
 ]
 
 export function RelettingFeeCalculator() {
+
   const dispatch = useDispatch()
   const {
     useDates,
@@ -91,6 +93,14 @@ export function RelettingFeeCalculator() {
   
     // 3 & 4. Apply the formula: (2 weeks rent × remaining weeks) ÷ (3/4 term)
     const relettingFee = (twoWeeksRentWithGST * remainingWeeks) / threeQuartersTerm
+
+      // Add the tracking event here
+    gaEvent({
+    action: 'calculate',
+    category: 'reletting_fee',
+    label: `Term: ${term} weeks, Base Rent: $${baseRent}`,
+    value: Math.round(relettingFee * 100) / 100
+  })
   
     dispatch(updateRelettingFee({
       calculatedFee: {

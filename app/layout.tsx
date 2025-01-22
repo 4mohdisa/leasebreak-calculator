@@ -5,6 +5,8 @@ import { Footer } from "./components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ReduxProvider } from "@/lib/redux/provider"
 import "./globals.css"
+import { Analytics } from "@vercel/analytics/react"
+import GoogleAnalytics from "./components/GoogleAnalytics"
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -95,8 +97,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+      <GoogleAnalytics GA_MEASUREMENT_ID="G-JZ4HSH1P8X" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
       >
@@ -109,7 +115,10 @@ export default function RootLayout({
           <ReduxProvider>
             <div className="relative flex min-h-screen flex-col">
               <Navbar />
-              <main className="flex-1">{children}</main>
+              <main className="flex-1">
+              {children}
+              <Analytics />
+              </main>
               <Footer />
             </div>
           </ReduxProvider>
