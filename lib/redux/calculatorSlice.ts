@@ -13,7 +13,7 @@ interface CalculatorState {
   relettingFee: {
     useDates: boolean
     baseWeeklyRent: string
-    term: number  
+    term: number  // Defined in interface
     weeksRemaining: string
     moveOutDate: string | null
     agreementEndDate: string | null
@@ -37,12 +37,15 @@ const initialState: CalculatorState = {
   relettingFee: {
     useDates: false,
     baseWeeklyRent: '',
+    term: 52,     // Add this line to match interface
     weeksRemaining: '',
     moveOutDate: null,
     agreementEndDate: null,
     calculatedFee: null,
   },
 }
+
+// Rest of the code remains the same
 
 export const calculatorSlice = createSlice({
   name: 'calculator',
