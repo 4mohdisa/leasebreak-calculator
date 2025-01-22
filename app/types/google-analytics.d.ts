@@ -4,11 +4,9 @@ declare global {
       gtag: (
         type: string,
         action: string,
-        options?: {
-          [key: string]: any;
-        }
+        options?: Record<string, unknown>
       ) => void;
-      dataLayer: any[];
+      dataLayer: unknown[];
     }
   }
   
