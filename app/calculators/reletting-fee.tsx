@@ -29,6 +29,7 @@ export function RelettingFeeCalculator() {
   const {
     useDates,
     baseWeeklyRent,
+    term,
     weeksRemaining,
     moveOutDate,
     agreementEndDate,
@@ -75,9 +76,14 @@ export function RelettingFeeCalculator() {
       return
     }
   
-    // Get term weeks from selected term
-    const termWeeks = parseInt(term)
-    const threeQuartersTerm = Math.round(termWeeks * 0.75)
+    // Ensure term is available and valid
+    if (!term) {
+      console.error('Term is not selected');
+      return;
+    }
+  
+    // Calculate three quarters term
+    const threeQuartersTerm = Math.round(term * 0.75)
   
     // 3 & 4. Apply the formula: (2 weeks rent × remaining weeks) ÷ (3/4 term)
     const relettingFee = (twoWeeksRentWithGST * remainingWeeks) / threeQuartersTerm
@@ -114,9 +120,9 @@ export function RelettingFeeCalculator() {
             <div>
               <Label>Agreed Term</Label>
               <Select 
-                onValueChange={(value) => dispatch(updateRelettingFee({ weeksRemaining: value }))}
-                defaultValue="52"
-              >
+  onValueChange={(value) => dispatch(updateRelettingFee({ term: parseInt(value) }))}
+  defaultValue={term?.toString() || "52"}
+>
                 <SelectTrigger>
                   <SelectValue placeholder="Select term length" />
                 </SelectTrigger>
