@@ -7,13 +7,13 @@ import { Form } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
+import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DateInput } from "@/app/components/date-input"
 import { RootState } from "@/lib/redux/store"
 import { updateAdvertisingFee } from "@/lib/redux/calculatorSlice"
 import { event as gaEvent } from '@/lib/gtag'
 import { calculateWeeksRemaining } from '@/lib/helpers/date-helpers'
-import { Button } from "react-day-picker"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -33,33 +33,47 @@ export function AdvertisingFeeCalculator() {
     weeksRemaining,
     moveOutDate,
     agreementEndDate,
-    calculatedFee
+    calculatedFee,
+    error
   } = useSelector((state: RootState) => state.calculator.advertisingFee)
 
   const calculateFee = () => {
     const threeQuartersOfTermWeeks = Math.round(term * 0.75)
-    const remainingWeeks = useDates && moveOutDate && agreementEndDate
-      ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
-      : parseFloat(weeksRemaining)
+    let remainingWeeks = 0
+
+    if (useDates && moveOutDate && agreementEndDate) {
+      remainingWeeks = calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
+    } else {
+      remainingWeeks = parseFloat(weeksRemaining)
+    }
     
     const adCost = parseFloat(advertisingCost)
     
     if (isNaN(adCost) || isNaN(remainingWeeks)) {
+      dispatch(updateAdvertisingFee({ error: "Please enter valid numbers for all fields" }))
+      return
+    }
+
+    if (remainingWeeks <= 0) {
+      dispatch(updateAdvertisingFee({ error: "Remaining weeks must be greater than 0" }))
       return
     }
   
     // Apply official formula
     const fee = (adCost * remainingWeeks) / threeQuartersOfTermWeeks
 
-  // Track the calculation event
-  gaEvent({
-    action: 'calculate',
-    category: 'advertising_fee',
-    label: `Term: ${term} weeks, Cost: ${adCost}, Weeks Remaining: ${remainingWeeks}`,
-    value: Math.round(fee * 100) / 100
-  })
+    // Track the calculation event
+    gaEvent({
+      action: 'calculate',
+      category: 'advertising_fee',
+      label: `Term: ${term} weeks, Cost: ${adCost}, Weeks Remaining: ${remainingWeeks}`,
+      value: Math.round(fee * 100) / 100
+    })
   
-    dispatch(updateAdvertisingFee({ calculatedFee: Math.round(fee * 100) / 100 }))
+    dispatch(updateAdvertisingFee({ 
+      calculatedFee: Math.round(fee * 100) / 100,
+      error: null 
+    }))
   }
 
   return (
@@ -148,14 +162,25 @@ export function AdvertisingFeeCalculator() {
               </div>
             )}
 
-            <Button onClick={calculateFee} type="button">
+            <Button 
+              onClick={calculateFee}
+              className="w-full mt-4"
+            >
               Calculate Fee
             </Button>
+
+            {error && (
+              <div className="mt-4 p-4 bg-error rounded-lg">
+                <p className="text-lg font-semibold">
+                  {error}
+                </p>
+              </div>
+            )}
 
             {calculatedFee !== null && (
               <div className="mt-4 p-4 bg-secondary rounded-lg">
                 <p className="text-lg font-semibold">
-                  Calculated Advertising Fee: ${calculatedFee}
+                  Calculated Fee: ${calculatedFee.toFixed(2)}
                 </p>
               </div>
             )}

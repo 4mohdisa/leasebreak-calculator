@@ -1,10 +1,11 @@
-import { format, isValid } from "date-fns"
+import { format, isValid, parse } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "lucide-react"
-import { DayPickerProvider } from "react-day-picker"
+import { DayPickerProvider, DayPickerProps } from "react-day-picker"
 import React from "react"
 
 interface DateInputProps {
@@ -34,16 +35,36 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
   }, [value])
 
   const tryParseDate = (input: string): Date | null => {
-    // If empty, return null
     if (!input.trim()) return null
 
-    // First try direct Date parsing
+    // Try different date formats
+    const formats = [
+      "dd/MM/yyyy",
+      "d/M/yyyy",
+      "dd-MM-yyyy",
+      "d-M-yyyy",
+      "yyyy-MM-dd",
+      "dd.MM.yyyy",
+      "d.M.yyyy"
+    ]
+
+    for (const dateFormat of formats) {
+      try {
+        const parsedDate = parse(input, dateFormat, new Date())
+        if (isValid(parsedDate)) {
+          return parsedDate
+        }
+      } catch (e) {
+        // Continue to next format
+      }
+    }
+
+    // Try direct Date parsing as last resort
     const directDate = new Date(input)
     if (isValid(directDate)) {
       return directDate
     }
 
-    // If direct parsing fails, return null
     return null
   }
 
@@ -62,21 +83,31 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
       onChange(parsedDate)
       setError(null)
     } else {
-      setError("Invalid date format")
+      setError("Please enter a valid date")
     }
   }
 
+  // Configure default props for DayPicker
+  const defaultProps: DayPickerProps = {
+    mode: "single",
+    selected: value || undefined,
+    onSelect: (date) => onChange(date || null),
+    fromYear: 2020,
+    toYear: 2030,
+    captionLayout: "dropdown"
+  }
+
   return (
-    <div className="relative">
-      <div className="flex flex-col gap-1">
-        <div className="flex">
-          <input
+    <DayPickerProvider initialProps={defaultProps}>
+      <div className="space-y-2">
+        <div className="flex gap-2">
+          <Input
             type="text"
             value={inputValue}
             onChange={handleInputChange}
             placeholder="DD/MM/YYYY"
             className={cn(
-              "w-full",
+              "flex-1",
               errorState && "border-red-500 focus-visible:ring-red-500"
             )}
           />
@@ -85,7 +116,7 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
               <Button
                 variant={"outline"}
                 className={cn(
-                  "ml-2 px-2",
+                  "px-2",
                   !value && "text-muted-foreground"
                 )}
               >
@@ -93,32 +124,21 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-              <DayPickerProvider initialProps={{
-                mode: "single",
-                selected: value || undefined,
-                onSelect: (date: Date | undefined) => {
-                  onChange(date || null)
-                  setError(null)
-                }
-              }}>
-                <Calendar
-                  mode="single"
-                  selected={value || undefined}
-                  onSelect={(date: Date | undefined) => {
-                    onChange(date || null)
-                    setError(null)
-                  }}
-                />
-              </DayPickerProvider>
+              <Calendar
+                mode="single"
+                selected={value || undefined}
+                onSelect={(date) => onChange(date || null)}
+                initialFocus
+                fromYear={2020}
+                toYear={2030}
+              />
             </PopoverContent>
           </Popover>
         </div>
-        {(errorState || error) && (
-          <p className="text-sm text-red-500">
-            {errorState || error}
-          </p>
+        {errorState && (
+          <p className="text-sm text-red-500">{errorState}</p>
         )}
       </div>
-    </div>
+    </DayPickerProvider>
   )
 }

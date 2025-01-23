@@ -34,34 +34,58 @@ export function RelettingFeeCalculator() {
     weeksRemaining,
     moveOutDate,
     agreementEndDate,
-    calculatedFee
+    calculatedFee,
+    error
   } = useSelector((state: RootState) => state.calculator.relettingFee)
   
   const handleCalculate = () => {
-    const baseRent = parseFloat(baseWeeklyRent)
-    const remainingWeeks = useDates ? 
-      calculateWeeksRemaining(new Date(moveOutDate!), new Date(agreementEndDate!)) : 
-      parseFloat(weeksRemaining)
+    // Reset any previous errors
+    dispatch(updateRelettingFee({ error: null }))
 
-    // Validate inputs
+    // Validate base weekly rent
+    const baseRent = parseFloat(baseWeeklyRent)
     if (isNaN(baseRent) || baseRent <= 0) {
-      dispatch(updateRelettingFee({ calculatedFee: null }))
+      dispatch(updateRelettingFee({ 
+        error: "Please enter a valid weekly rent amount",
+        calculatedFee: null 
+      }))
       return
+    }
+
+    // Calculate and validate remaining weeks
+    let remainingWeeks = 0
+    if (useDates) {
+      if (!moveOutDate || !agreementEndDate) {
+        dispatch(updateRelettingFee({ 
+          error: "Please select both move out and agreement end dates",
+          calculatedFee: null 
+        }))
+        return
+      }
+      remainingWeeks = calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
+    } else {
+      remainingWeeks = parseFloat(weeksRemaining)
     }
 
     if (isNaN(remainingWeeks) || remainingWeeks <= 0) {
-      dispatch(updateRelettingFee({ calculatedFee: null }))
+      dispatch(updateRelettingFee({ 
+        error: "Remaining weeks must be greater than 0",
+        calculatedFee: null 
+      }))
       return
     }
 
-    // Ensure term is available and valid
+    // Validate term
     if (!term || term <= 0) {
-      dispatch(updateRelettingFee({ calculatedFee: null }))
+      dispatch(updateRelettingFee({ 
+        error: "Please select a valid term",
+        calculatedFee: null 
+      }))
       return
     }
 
     try {
-      // Calculate GST inclusive weekly rent
+      // Calculate GST inclusive weekly rent (10% GST)
       const weeklyRentWithGST = baseRent * 1.1
 
       // Calculate two weeks rent with GST
@@ -77,7 +101,7 @@ export function RelettingFeeCalculator() {
       gaEvent({
         action: 'calculate',
         category: 'reletting_fee',
-        label: `Term: ${term} weeks, Base Rent: $${baseRent}`,
+        label: `Term: ${term} weeks, Base Rent: $${baseRent}, Weeks Remaining: ${remainingWeeks}`,
         value: Math.round(relettingFee * 100) / 100
       })
 
@@ -86,11 +110,15 @@ export function RelettingFeeCalculator() {
         calculatedFee: {
           weeklyRentWithGST: Math.round(weeklyRentWithGST * 100) / 100,
           maximumRelettingFee: Math.round(relettingFee * 100) / 100
-        }
+        },
+        error: null
       }))
     } catch (error) {
       console.error('Calculation error:', error)
-      dispatch(updateRelettingFee({ calculatedFee: null }))
+      dispatch(updateRelettingFee({ 
+        error: "An error occurred during calculation",
+        calculatedFee: null 
+      }))
     }
   }
 
@@ -180,9 +208,20 @@ export function RelettingFeeCalculator() {
               </div>
             )}
 
-            <Button onClick={handleCalculate} type="button">
+            <Button 
+              onClick={handleCalculate} 
+              className="w-full mt-4"
+            >
               Calculate Fee
             </Button>
+
+            {error && (
+              <div className="mt-4 p-4 bg-destructive/15 rounded-lg">
+                <p className="text-destructive font-medium">
+                  {error}
+                </p>
+              </div>
+            )}
 
             {calculatedFee && (
               <div className="mt-4 p-4 bg-secondary rounded-lg space-y-2">
