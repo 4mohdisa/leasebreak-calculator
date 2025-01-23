@@ -4,6 +4,7 @@ import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "lucide-react"
+import { DayPickerProvider } from "react-day-picker"
 import React from "react"
 
 interface DateInputProps {
@@ -92,6 +93,7 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
+            <DayPickerProvider>
               <Calendar
                 mode="single"
                 selected={value || undefined}
@@ -100,6 +102,7 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
                   setError(null)
                 }}
               />
+              </DayPickerProvider>
             </PopoverContent>
           </Popover>
         </div>
