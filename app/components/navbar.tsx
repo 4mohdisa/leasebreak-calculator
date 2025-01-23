@@ -34,7 +34,7 @@ export function Navbar() {
             closeMenu()
           }}
           className={cn(
-            "py-2 px-4 text-sm font-medium text-primary-foreground hover:bg-accent hover:text-accent-foreground",
+            "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
             activeSection === "leasebreakcalculator" && "bg-accent text-accent-foreground"
           )}
         >
@@ -49,7 +49,7 @@ export function Navbar() {
             closeMenu()
           }}
           className={cn(
-            "py-2 px-4 text-sm font-medium text-primary-foreground hover:bg-accent hover:text-accent-foreground",
+            "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
             activeSection === "about" && "bg-accent text-accent-foreground"
           )}
         >
@@ -64,7 +64,7 @@ export function Navbar() {
             closeMenu()
           }}
           className={cn(
-            "py-2 px-4 text-sm font-medium text-primary-foreground hover:bg-accent hover:text-accent-foreground",
+            "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
             activeSection === "support" && "bg-accent text-accent-foreground"
           )}
         >
@@ -79,7 +79,7 @@ export function Navbar() {
             closeMenu()
           }}
           className={cn(
-            "py-2 px-4 text-sm font-medium text-primary-foreground hover:bg-accent hover:text-accent-foreground",
+            "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
             activeSection === "contact" && "bg-accent text-accent-foreground"
           )}
         >
