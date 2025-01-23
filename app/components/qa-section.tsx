@@ -38,6 +38,11 @@ const faqs = [
     answer:
       "You can apply to SACAT to end the tenancy if continuing it will cause 'undue hardship'. However, it's important to note that financial difficulties alone generally don't qualify as undue hardship. Each case is assessed individually by SACAT.",
   },
+  {
+    question: "How are remaining weeks calculated in a lease break?",
+    answer:
+    "The calculation takes the days between your move-out date and lease end date, divides by 7 to get complete weeks. If there are 5 or more remaining days after complete weeks, an extra week is added. For example, if there are 45 days remaining, this equals 6 complete weeks (42 days) plus 3 days. Since 3 days is less than 5, no extra week is added, so the final count is 6 weeks. However, if there were 47 days (6 weeks plus 5 days), the final count would be 7 weeks since the remaining days equal or exceed 5."
+  }
 ]
 
 export function QASection() {
