@@ -93,17 +93,24 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="end">
-            <DayPickerProvider>
-              <Calendar
-                mode="single"
-                selected={value || undefined}
-                onSelect={(date: any) => {
-                  onChange(date || null)
-                  setError(null)
-                }}
-              />
-              </DayPickerProvider>
-            </PopoverContent>
+  <DayPickerProvider initialProps={{
+    mode: "single",
+    selected: value || undefined,
+    onSelect: (date: any) => {
+      onChange(date || null)
+      setError(null)
+    }
+  }}>
+    <Calendar
+      mode="single"
+      selected={value || undefined}
+      onSelect={(date: any) => {
+        onChange(date || null)
+        setError(null)
+      }}
+    />
+  </DayPickerProvider>
+</PopoverContent>
           </Popover>
         </div>
         {(errorState || error) && (
