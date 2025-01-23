@@ -15,7 +15,7 @@ interface DateInputProps {
   error?: string
 }
 
-export function DateInput({ value, onChange, error }: DateInputProps) {
+export function DateInput({ value, onChange }: DateInputProps) {
   const [inputValue, setInputValue] = React.useState("")
   const [errorState, setError] = React.useState<string | null>(null)
 
@@ -37,32 +37,96 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
   const tryParseDate = (input: string): Date | null => {
     if (!input.trim()) return null
 
+    // Clean the input - remove multiple spaces and common separators
+    const cleanInput = input.trim()
+      .replace(/\s+/g, ' ')
+      .replace(/[.,\/#!$%\^&\*;:{}=_`~()]/g, '/')
+      .replace(/\/+/g, '/')
+
     // Try different date formats
     const formats = [
+      // Common Australian formats (DD/MM/YYYY)
       "dd/MM/yyyy",
+      "d/MM/yyyy",
+      "dd/M/yyyy",
       "d/M/yyyy",
+      
+      // With dashes
       "dd-MM-yyyy",
+      "d-MM-yyyy",
+      "dd-M-yyyy",
       "d-M-yyyy",
-      "yyyy-MM-dd",
+      
+      // With dots
       "dd.MM.yyyy",
-      "d.M.yyyy"
+      "d.MM.yyyy",
+      "dd.M.yyyy",
+      "d.M.yyyy",
+      
+      // ISO format (YYYY-MM-DD)
+      "yyyy-MM-dd",
+      "yyyy/MM/dd",
+      
+      // Short year formats
+      "dd/MM/yy",
+      "d/MM/yy",
+      "dd/M/yy",
+      "d/M/yy",
+      
+      // Month first formats (US style)
+      "MM/dd/yyyy",
+      "M/dd/yyyy",
+      "MM/d/yyyy",
+      "M/d/yyyy",
+      
+      // Text month formats
+      "dd MMM yyyy",
+      "d MMM yyyy",
+      "dd MMMM yyyy",
+      "d MMMM yyyy",
+      
+      // Text month with commas
+      "MMM dd, yyyy",
+      "MMMM dd, yyyy",
+      
+      // Reverse formats
+      "yyyy MMM dd",
+      "yyyy MMMM dd"
     ]
 
+    // First try the exact formats
     for (const dateFormat of formats) {
       try {
-        const parsedDate = parse(input, dateFormat, new Date())
+        const parsedDate = parse(cleanInput, dateFormat, new Date())
         if (isValid(parsedDate)) {
-          return parsedDate
+          // Validate the year is reasonable (between 1900 and 2100)
+          const year = parsedDate.getFullYear()
+          if (year >= 1900 && year <= 2100) {
+            return parsedDate
+          }
         }
-      } catch (e) {
-        // Continue to next format
+      } catch {} // Ignore parsing errors and try next format
+    }
+
+    // If no format worked, try direct parsing
+    const directDate = new Date(cleanInput)
+    if (isValid(directDate)) {
+      const year = directDate.getFullYear()
+      if (year >= 1900 && year <= 2100) {
+        return directDate
       }
     }
 
-    // Try direct Date parsing as last resort
-    const directDate = new Date(input)
-    if (isValid(directDate)) {
-      return directDate
+    // Try parsing potential Unix timestamp
+    if (/^\d+$/.test(cleanInput)) {
+      const timestamp = parseInt(cleanInput)
+      const timestampDate = new Date(timestamp)
+      if (isValid(timestampDate)) {
+        const year = timestampDate.getFullYear()
+        if (year >= 1900 && year <= 2100) {
+          return timestampDate
+        }
+      }
     }
 
     return null
