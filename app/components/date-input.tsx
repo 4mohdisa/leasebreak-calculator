@@ -97,7 +97,7 @@ export function DateInput({ value, onChange, error }: DateInputProps) {
               <Calendar
                 mode="single"
                 selected={value || undefined}
-                onSelect={(date) => {
+                onSelect={(date: any) => {
                   onChange(date || null)
                   setError(null)
                 }}
