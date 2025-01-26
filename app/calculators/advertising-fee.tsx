@@ -13,7 +13,9 @@ import { DateInput } from "@/app/components/date-input"
 import { RootState } from "@/lib/redux/store"
 import { updateAdvertisingFee } from "@/lib/redux/calculatorSlice"
 import { event as gaEvent } from '@/lib/gtag'
-import { calculateWeeksRemaining } from '@/lib/helpers/date-helpers'
+import { calculateWeeksRemaining, createSafeDate } from '@/lib/helpers/date-helpers'
+import { parse, isValid } from 'date-fns'
+import React from "react"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -37,29 +39,81 @@ export function AdvertisingFeeCalculator() {
     error
   } = useSelector((state: RootState) => state.calculator.advertisingFee)
 
-  const calculateFee = () => {
-    const threeQuartersOfTermWeeks = Math.round(term * 0.75)
+  const [rawMoveOutDate, setRawMoveOutDate] = React.useState("")
+  const [rawEndDate, setRawEndDate] = React.useState("")
+  const [dateError, setDateError] = React.useState<string | null>(null)
+
+  const handleCalculate = () => {
+    // Reset any previous errors
+    dispatch(updateAdvertisingFee({ error: null }))
+    setDateError(null)
+
+    // Validate advertising cost
+    const adCost = parseFloat(advertisingCost)
+    if (isNaN(adCost) || adCost <= 0) {
+      dispatch(updateAdvertisingFee({ 
+        error: "Please enter a valid advertising cost amount",
+        calculatedFee: null 
+      }))
+      return
+    }
+
+    // Calculate and validate remaining weeks
     let remainingWeeks = 0
 
-    if (useDates && moveOutDate && agreementEndDate) {
-      remainingWeeks = calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
+    if (useDates) {
+      // Try to parse the dates
+      let moveOutDateObj = null
+      let endDateObj = null
+
+      try {
+        if (rawMoveOutDate) {
+          moveOutDateObj = parse(rawMoveOutDate, "dd/MM/yyyy", new Date())
+          if (!isValid(moveOutDateObj)) {
+            moveOutDateObj = createSafeDate(rawMoveOutDate)
+          }
+        }
+        if (rawEndDate) {
+          endDateObj = parse(rawEndDate, "dd/MM/yyyy", new Date())
+          if (!isValid(endDateObj)) {
+            endDateObj = createSafeDate(rawEndDate)
+          }
+        }
+      } catch (e) {
+        // Handle parsing errors
+      }
+
+      if (!moveOutDateObj || !endDateObj) {
+        setDateError("Please enter valid dates in DD/MM/YYYY format")
+        dispatch(updateAdvertisingFee({ 
+          error: "Please enter valid dates",
+          calculatedFee: null 
+        }))
+        return
+      }
+
+      // Store the parsed dates
+      dispatch(updateAdvertisingFee({
+        moveOutDate: moveOutDateObj.toISOString(),
+        agreementEndDate: endDateObj.toISOString()
+      }))
+
+      const weeksResult = calculateWeeksRemaining(moveOutDateObj, endDateObj)
+      if (weeksResult.error || weeksResult.weeks === null) {
+        setDateError(weeksResult.error)
+        dispatch(updateAdvertisingFee({ 
+          error: weeksResult.error || "Error calculating weeks",
+          calculatedFee: null 
+        }))
+        return
+      }
+      remainingWeeks = weeksResult.weeks
     } else {
       remainingWeeks = parseFloat(weeksRemaining)
     }
-    
-    const adCost = parseFloat(advertisingCost)
-    
-    if (isNaN(adCost) || isNaN(remainingWeeks)) {
-      dispatch(updateAdvertisingFee({ error: "Please enter valid numbers for all fields" }))
-      return
-    }
 
-    if (remainingWeeks <= 0) {
-      dispatch(updateAdvertisingFee({ error: "Remaining weeks must be greater than 0" }))
-      return
-    }
-  
     // Apply official formula
+    const threeQuartersOfTermWeeks = Math.round(term * 0.75)
     const fee = (adCost * remainingWeeks) / threeQuartersOfTermWeeks
 
     // Track the calculation event
@@ -69,7 +123,7 @@ export function AdvertisingFeeCalculator() {
       label: `Term: ${term} weeks, Cost: ${adCost}, Weeks Remaining: ${remainingWeeks}`,
       value: Math.round(fee * 100) / 100
     })
-  
+
     dispatch(updateAdvertisingFee({ 
       calculatedFee: Math.round(fee * 100) / 100,
       error: null 
@@ -130,13 +184,25 @@ export function AdvertisingFeeCalculator() {
                   <Label>Move Out Date</Label>
                   <DateInput
                     value={moveOutDate ? new Date(moveOutDate) : null}
-                    onChange={(date) => dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() ?? null }))} label={""}                  />
+                    onChange={(date, raw) => {
+                      if (raw !== undefined) setRawMoveOutDate(raw)
+                      dispatch(updateAdvertisingFee({ moveOutDate: date?.toISOString() ?? null }))
+                    }}
+                    label={""}
+                    error={dateError}
+                  />
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Label>Agreement End Date</Label>
                   <DateInput
                     value={agreementEndDate ? new Date(agreementEndDate) : null}
-                    onChange={(date) => dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() ?? null }))} label={""}                  />
+                    onChange={(date, raw) => {
+                      if (raw !== undefined) setRawEndDate(raw)
+                      dispatch(updateAdvertisingFee({ agreementEndDate: date?.toISOString() ?? null }))
+                    }}
+                    label={""}
+                    error={dateError}
+                  />
                 </div>
                 {/* Display calculated weeks if both dates are selected */}
                 {moveOutDate && agreementEndDate && (
@@ -144,7 +210,7 @@ export function AdvertisingFeeCalculator() {
                     <p className="text-sm">
                       Calculated weeks remaining:{' '}
                       <span className="font-medium">
-                        {moveOutDate && agreementEndDate ? calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate)) : 0}
+                        {calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate)).weeks ?? 0}
                       </span>
                     </p>
                   </div>
@@ -163,7 +229,7 @@ export function AdvertisingFeeCalculator() {
             )}
 
             <Button 
-              onClick={calculateFee}
+              onClick={handleCalculate}
               className="w-full mt-4"
             >
               Calculate Fee

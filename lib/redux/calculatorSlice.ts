@@ -27,6 +27,13 @@ interface CalculatorState {
     error: string | null
     isLoading: boolean
   }
+  rentCalculator: {
+    weeklyRent: string
+    calculatedAdvance: number | null
+    calculatedBond: number | null
+    calculatedTotal: number | null
+    error: string | null
+  }
 }
 
 const initialState: CalculatorState = {
@@ -53,6 +60,13 @@ const initialState: CalculatorState = {
     error: null,
     isLoading: false
   },
+  rentCalculator: {
+    weeklyRent: "",
+    calculatedAdvance: null,
+    calculatedBond: null,
+    calculatedTotal: null,
+    error: null
+  }
 }
 
 export const calculatorSlice = createSlice({
@@ -73,6 +87,9 @@ export const calculatorSlice = createSlice({
         error: null // Clear any previous errors
       }
     },
+    updateRentCalculator: (state, action: PayloadAction<Partial<CalculatorState['rentCalculator']>>) => {
+      state.rentCalculator = { ...state.rentCalculator, ...action.payload }
+    },
     setAdvertisingFeeError: (state, action: PayloadAction<string>) => {
       state.advertisingFee.error = action.payload
       state.advertisingFee.isLoading = false
@@ -80,6 +97,9 @@ export const calculatorSlice = createSlice({
     setRelettingFeeError: (state, action: PayloadAction<string>) => {
       state.relettingFee.error = action.payload
       state.relettingFee.isLoading = false
+    },
+    setRentCalculatorError: (state, action: PayloadAction<string>) => {
+      state.rentCalculator.error = action.payload
     },
     setAdvertisingFeeLoading: (state, action: PayloadAction<boolean>) => {
       state.advertisingFee.isLoading = action.payload
@@ -99,18 +119,24 @@ export const calculatorSlice = createSlice({
     resetRelettingFee: (state) => {
       state.relettingFee = initialState.relettingFee
     },
+    resetRentCalculator: (state) => {
+      state.rentCalculator = initialState.rentCalculator
+    },
   },
 })
 
 export const {
   updateAdvertisingFee,
   updateRelettingFee,
+  updateRentCalculator,
   setAdvertisingFeeError,
   setRelettingFeeError,
+  setRentCalculatorError,
   setAdvertisingFeeLoading,
   setRelettingFeeLoading,
   resetAdvertisingFee,
   resetRelettingFee,
+  resetRentCalculator,
 } = calculatorSlice.actions
 
 export default calculatorSlice.reducer

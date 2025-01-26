@@ -13,7 +13,9 @@ import { DateInput } from "@/app/components/date-input"
 import { RootState } from "@/lib/redux/store"
 import { updateRelettingFee } from "@/lib/redux/calculatorSlice"
 import { event as gaEvent } from '@/lib/gtag'
-import { calculateWeeksRemaining } from '@/lib/helpers/date-helpers'
+import { calculateWeeksRemaining, createSafeDate } from '@/lib/helpers/date-helpers'
+import { parse, isValid } from 'date-fns'
+import React from "react"
 
 const TERM_OPTIONS = [
   { label: "6 Months", weeks: 26 },
@@ -37,10 +39,15 @@ export function RelettingFeeCalculator() {
     calculatedFee,
     error
   } = useSelector((state: RootState) => state.calculator.relettingFee)
-  
+
+  const [rawMoveOutDate, setRawMoveOutDate] = React.useState("")
+  const [rawEndDate, setRawEndDate] = React.useState("")
+  const [dateError, setDateError] = React.useState<string | null>(null)
+
   const handleCalculate = () => {
     // Reset any previous errors
     dispatch(updateRelettingFee({ error: null }))
+    setDateError(null)
 
     // Validate base weekly rent
     const baseRent = parseFloat(baseWeeklyRent)
@@ -55,14 +62,52 @@ export function RelettingFeeCalculator() {
     // Calculate and validate remaining weeks
     let remainingWeeks = 0
     if (useDates) {
-      if (!moveOutDate || !agreementEndDate) {
+      // Try to parse the dates
+      let moveOutDateObj = null
+      let endDateObj = null
+
+      try {
+        if (rawMoveOutDate) {
+          moveOutDateObj = parse(rawMoveOutDate, "dd/MM/yyyy", new Date())
+          if (!isValid(moveOutDateObj)) {
+            moveOutDateObj = createSafeDate(rawMoveOutDate)
+          }
+        }
+        if (rawEndDate) {
+          endDateObj = parse(rawEndDate, "dd/MM/yyyy", new Date())
+          if (!isValid(endDateObj)) {
+            endDateObj = createSafeDate(rawEndDate)
+          }
+        }
+      } catch (e) {
+        // Handle parsing errors
+      }
+
+      if (!moveOutDateObj || !endDateObj) {
+        setDateError("Please enter valid dates in DD/MM/YYYY format")
         dispatch(updateRelettingFee({ 
-          error: "Please select both move out and agreement end dates",
+          error: "Please enter valid dates",
           calculatedFee: null 
         }))
         return
       }
-      remainingWeeks = calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))
+
+      // Store the parsed dates
+      dispatch(updateRelettingFee({
+        moveOutDate: moveOutDateObj.toISOString(),
+        agreementEndDate: endDateObj.toISOString()
+      }))
+
+      const weeksResult = calculateWeeksRemaining(moveOutDateObj, endDateObj)
+      if (weeksResult.error || weeksResult.weeks === null) {
+        setDateError(weeksResult.error)
+        dispatch(updateRelettingFee({ 
+          error: weeksResult.error || "Error calculating weeks",
+          calculatedFee: null 
+        }))
+        return
+      }
+      remainingWeeks = weeksResult.weeks
     } else {
       remainingWeeks = parseFloat(weeksRemaining)
     }
@@ -176,13 +221,25 @@ export function RelettingFeeCalculator() {
                   <Label>Move Out Date</Label>
                   <DateInput
                     value={moveOutDate ? new Date(moveOutDate) : null}
-                    onChange={(date) => dispatch(updateRelettingFee({ moveOutDate: date?.toISOString() ?? null }))} label={""}                  />
+                    onChange={(date, raw) => {
+                      if (raw !== undefined) setRawMoveOutDate(raw)
+                      dispatch(updateRelettingFee({ moveOutDate: date?.toISOString() ?? null }))
+                    }}
+                    label={""}
+                    error={dateError}
+                  />
                 </div>
                 <div className="flex flex-col space-y-2">
                   <Label>Agreement End Date</Label>
                   <DateInput
                     value={agreementEndDate ? new Date(agreementEndDate) : null}
-                    onChange={(date) => dispatch(updateRelettingFee({ agreementEndDate: date?.toISOString() ?? null }))} label={""}                  />
+                    onChange={(date, raw) => {
+                      if (raw !== undefined) setRawEndDate(raw)
+                      dispatch(updateRelettingFee({ agreementEndDate: date?.toISOString() ?? null }))
+                    }}
+                    label={""}
+                    error={dateError}
+                  />
                 </div>
                 {/* Add calculated weeks display here */}
                 {moveOutDate && agreementEndDate && (
@@ -190,7 +247,7 @@ export function RelettingFeeCalculator() {
                     <p className="text-sm">
                       Calculated weeks remaining:{' '}
                       <span className="font-medium">
-                        {calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate))}
+                        {calculateWeeksRemaining(new Date(moveOutDate), new Date(agreementEndDate)).weeks ?? 0}
                       </span>
                     </p>
                   </div>

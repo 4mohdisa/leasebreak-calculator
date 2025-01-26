@@ -3,6 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Card, CardContent } from "@/components/ui/card"
 import { AdvertisingFeeCalculator } from "./calculators/advertising-fee"
 import { RelettingFeeCalculator } from "./calculators/reletting-fee"
+import { RentCalculator } from "./calculators/rent-calculator"
 import { Masthead } from "./components/masthead"
 import { AboutSection } from "./components/about-section"
 import { QASection } from "./components/qa-section"
@@ -43,9 +44,10 @@ export default function Home() {
               <Card className="w-full max-w-3xl mx-auto">
                 <CardContent className="p-6">
                   <Tabs defaultValue="reletting" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2">
+                    <TabsList className="grid w-full grid-cols-3">
                       <TabsTrigger value="reletting">Reletting Fee</TabsTrigger>
                       <TabsTrigger value="advertising">Advertising Fee</TabsTrigger>
+                      <TabsTrigger value="rent">Rent Calculator</TabsTrigger>
                     </TabsList>
                     <div className="mt-6">
                       <TabsContent value="reletting" className="space-y-4">
@@ -53,6 +55,9 @@ export default function Home() {
                       </TabsContent>
                       <TabsContent value="advertising" className="space-y-4">
                         <AdvertisingFeeCalculator />
+                      </TabsContent>
+                      <TabsContent value="rent" className="space-y-4">
+                        <RentCalculator />
                       </TabsContent>
                     </div>
                   </Tabs>

@@ -16,24 +16,34 @@ export function createSafeDate(date: string | Date | null): Date | null {
   }
 }
 
+interface WeeksCalculationResult {
+  weeks: number | null;
+  error: string | null;
+}
+
 /**
  * Calculates the number of weeks remaining between two dates
  * @param moveOut The move out date
  * @param endDate The end date of the agreement
- * @returns The number of complete weeks, with an extra week added if there are 5 or more remaining days
- * @throws Error if moveOut date is after endDate or if either date is invalid
+ * @returns Object containing weeks calculation result and any error message
  */
-export function calculateWeeksRemaining(moveOut: Date | string | null, endDate: Date | string | null): number {
+export function calculateWeeksRemaining(moveOut: Date | string | null, endDate: Date | string | null): WeeksCalculationResult {
   const moveOutDate = createSafeDate(moveOut)
   const agreementEndDate = createSafeDate(endDate)
 
   // Validate dates
   if (!moveOutDate || !agreementEndDate) {
-    throw new Error("Invalid date provided")
+    return {
+      weeks: null,
+      error: "Please enter a valid date"
+    }
   }
 
   if (moveOutDate > agreementEndDate) {
-    throw new Error("Move out date cannot be after end date")
+    return {
+      weeks: null,
+      error: "Move out date cannot be after end date"
+    }
   }
   
   // Get the difference in days
@@ -44,5 +54,8 @@ export function calculateWeeksRemaining(moveOut: Date | string | null, endDate: 
   const remainingDays = diffDays % 7
   
   // Add an extra week if there are 5 or more remaining days
-  return completeWeeks + (remainingDays >= 5 ? 1 : 0)
+  return {
+    weeks: completeWeeks + (remainingDays >= 5 ? 1 : 0),
+    error: null
+  }
 }
