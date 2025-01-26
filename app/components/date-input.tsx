@@ -1,6 +1,6 @@
 "use client"
 
-import { format, isValid, parse } from "date-fns"
+import { format, isValid } from "date-fns"
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -8,7 +8,6 @@ import { Input } from "@/components/ui/input"
 import { cn } from "@/lib/utils"
 import { CalendarIcon } from "lucide-react"
 import React from "react"
-import { createSafeDate } from "@/lib/helpers/date-helpers"
 
 interface DateInputProps {
   value: Date | null
@@ -30,7 +29,7 @@ export function DateInput({ value, onChange, error: externalError }: DateInputPr
       setInputValue("")
       setError(null)
     }
-  }, [value])
+  }, [value, inputValue])
 
   // Update error state when external error changes
   React.useEffect(() => {

@@ -62,25 +62,21 @@ export function RelettingFeeCalculator() {
     // Calculate and validate remaining weeks
     let remainingWeeks = 0
     if (useDates) {
-      // Try to parse the dates
+      // Parse the dates
       let moveOutDateObj = null
       let endDateObj = null
 
-      try {
-        if (rawMoveOutDate) {
-          moveOutDateObj = parse(rawMoveOutDate, "dd/MM/yyyy", new Date())
-          if (!isValid(moveOutDateObj)) {
-            moveOutDateObj = createSafeDate(rawMoveOutDate)
-          }
+      if (rawMoveOutDate) {
+        moveOutDateObj = parse(rawMoveOutDate, "dd/MM/yyyy", new Date())
+        if (!isValid(moveOutDateObj)) {
+          moveOutDateObj = createSafeDate(rawMoveOutDate)
         }
-        if (rawEndDate) {
-          endDateObj = parse(rawEndDate, "dd/MM/yyyy", new Date())
-          if (!isValid(endDateObj)) {
-            endDateObj = createSafeDate(rawEndDate)
-          }
+      }
+      if (rawEndDate) {
+        endDateObj = parse(rawEndDate, "dd/MM/yyyy", new Date())
+        if (!isValid(endDateObj)) {
+          endDateObj = createSafeDate(rawEndDate)
         }
-      } catch (e) {
-        // Handle parsing errors
       }
 
       if (!moveOutDateObj || !endDateObj) {
