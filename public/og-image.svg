@@ -15,7 +15,7 @@
   
   <!-- Text -->
   <text x="520" y="250" font-family="Arial" font-size="72" font-weight="bold" fill="#FFFFFF" text-anchor="start">
-    LeaseBreak Calculator
+    Lease Assistant
   </text>
   <text x="520" y="350" font-family="Arial" font-size="36" fill="#FFFFFF" text-anchor="start">
     SACAT-Compliant Lease Break Cost Calculator

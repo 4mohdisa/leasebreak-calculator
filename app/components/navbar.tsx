@@ -93,7 +93,7 @@ export function Navbar() {
     <div className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container mx-auto flex items-center justify-between py-4 px-2">
         <Link href="/" className="flex items-center space-x-2">
-          <span className="text-2xl font-bold">LeaseCalc</span>
+          <span className="text-2xl font-bold">LeaseCal</span>
         </Link>
 
         <div className="flex items-center space-x-4">
@@ -116,7 +116,7 @@ export function Navbar() {
               <SheetContent side="right">
                 <div className="flex flex-col h-full">
                   <div className="border-b py-4">
-                    <span className="text-2xl font-bold">LeaseCalc</span>
+                    <span className="text-2xl font-bold">LeaseCal</span>
                   </div>
                   <NavigationMenu className="mt-6">
                     <NavigationMenuList className="flex flex-col space-y-2">
@@ -125,7 +125,7 @@ export function Navbar() {
                   </NavigationMenu>
                   <div className="mt-auto border-t py-4">
                     <p className="text-sm text-muted-foreground">
-                      &copy; {new Date().getFullYear()} LeaseCalc
+                      &copy; {new Date().getFullYear()} LeaseCal
                     </p>
                   </div>
                 </div>

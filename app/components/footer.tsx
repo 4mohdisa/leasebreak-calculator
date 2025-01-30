@@ -10,7 +10,7 @@ export function Footer() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center justify-center space-y-6 text-center">
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-bold">LeaseCalc</span>
+            <span className="text-2xl font-bold">LeaseCal</span>
           </Link>
 
           <nav className="flex flex-wrap justify-center gap-4 text-sm text-muted-foreground">
@@ -72,7 +72,7 @@ export function Footer() {
         <Separator className="my-6" />
 
         <div className="text-center text-sm text-muted-foreground">
-          {new Date().getFullYear()} LeaseCalc. All rights reserved.
+          {new Date().getFullYear()} LeaseCal. All rights reserved.
         </div>
       </div>
     </footer>
