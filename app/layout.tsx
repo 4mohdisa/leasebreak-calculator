@@ -96,7 +96,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <GoogleAnalytics GA_MEASUREMENT_ID="G-JZ4HSH1P8X" />
+        <GoogleAnalytics GA_MEASUREMENT_ID="G-8P22ZMV89E" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
