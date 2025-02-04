@@ -25,12 +25,12 @@ export function Masthead() {
             </Button>
             <Button variant="outline" size="lg" asChild>
               <a 
-                href="https://www.sa.gov.au/topics/housing/renting-and-letting/renting-privately/ending-a-tenancy/Ending-a-fixed-term-lease-early" 
+                href="https://chromewebstore.google.com/detail/Lease/egnhbemhjghbjeflkmamnfigndlnhpnf" 
                 target="_blank" 
                 rel="noreferrer"
                 className="text-lg"
               >
-                SACAT Guidelines
+                Download Extension
               </a>
             </Button>
           </div>
