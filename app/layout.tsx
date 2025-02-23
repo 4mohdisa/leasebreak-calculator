@@ -92,7 +92,6 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
-
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
@@ -100,37 +99,35 @@ export default function RootLayout({
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateCalculatorSchema())
-          }}
-        />
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify(generateOrganizationSchema())
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@graph': [
+                generateCalculatorSchema(),
+                generateOrganizationSchema()
+              ].map(schema => ({ ...schema, '@context': undefined }))
+            })
           }}
         />
       </head>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} min-h-screen bg-background font-sans antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
-        >
-          <ReduxProvider>
+      <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
+        <ReduxProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
             <div className="relative flex min-h-screen flex-col">
               <Navbar />
-              <main className="flex-1">
+              <div className="flex-1">
                 {children}
-                <Analytics />
-              </main>
+              </div>
               <ContactSection />
               <Footer />
             </div>
-          </ReduxProvider>
-        </ThemeProvider>
+          </ThemeProvider>
+        </ReduxProvider>
+        <Analytics />
       </body>
     </html>
   )
