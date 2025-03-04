@@ -8,11 +8,10 @@ export function Masthead() {
         <div className="flex flex-col items-center justify-center max-w-4xl mx-auto text-center">
           <div className="space-y-6">
             <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl">
-              Early Lease Termination Calculator
+            🏡 Lease Break & Rental Income Calculator
             </h1>
             <p className="mx-auto max-w-[700px] text-muted-foreground text-lg md:text-xl">
-              Accurately calculate your lease break costs using official SACAT formulas.
-              Get instant estimates for advertising and reletting fees in South Australia.
+            A complete financial tool for landlords and tenants! Instantly calculate lease termination costs using official SACAT formulas and manage rental income breakdowns in one place.
             </p>
           </div>
 
@@ -49,9 +48,9 @@ export function Masthead() {
               </p>
             </div>
             <div className="flex flex-col justify-center space-y-3 rounded-lg border-2 p-6 bg-card">
-              <h3 className="text-xl font-bold">SACAT Compliance</h3>
+              <h3 className="text-xl font-bold">Landlord’s Income Breakdown</h3>
               <p className="text-muted-foreground">
-                All calculations follow the South Australian Civil and Administrative Tribunal&apos;s prescribed formulas and guidelines
+              Track rental income, expenses, and net profit with a detailed financial breakdown including maintenance, insurance, and council levies.
               </p>
             </div>
           </div>

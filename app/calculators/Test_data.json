@@ -1,0 +1,85 @@
+{
+    "testData": {
+      "rows": [
+        {
+          "id": "1",
+          "month": "January 2024",
+          "rent": 2120.00,
+          "realtorFees": 145.38,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 0,
+          "councilLevy": 0,
+          "waterSewer": 0,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 0
+        },
+        {
+          "id": "2",
+          "month": "February 2024",
+          "rent": 2650.00,
+          "realtorFees": 180.35,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 0,
+          "councilLevy": 895.05,
+          "waterSewer": 240.81,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 0
+        },
+        {
+          "id": "3",
+          "month": "March 2024",
+          "rent": 2319.00,
+          "realtorFees": 145.38,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 466.00,
+          "councilLevy": 0,
+          "waterSewer": 306.41,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 199.78
+        },
+        {
+          "id": "4",
+          "month": "April 2024",
+          "rent": 2120.00,
+          "realtorFees": 145.38,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 0,
+          "councilLevy": 441.35,
+          "waterSewer": 0,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 0
+        },
+        {
+          "id": "5",
+          "month": "May 2024",
+          "rent": 2650.00,
+          "realtorFees": 180.35,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 0,
+          "councilLevy": 0,
+          "waterSewer": 219.76,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 123.10
+        },
+        {
+          "id": "6",
+          "month": "June 2024",
+          "rent": 2243.10,
+          "realtorFees": 145.38,
+          "homeInsurance": 97.00,
+          "propertyMaintenance": 0,
+          "councilLevy": 0,
+          "waterSewer": 0,
+          "electricity": 0,
+          "gas": 0,
+          "tenantPaidBills": 0
+        }
+      ],
+      "interestPercentage": 4.5
+    }
+  }

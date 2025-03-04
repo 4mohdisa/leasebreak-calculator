@@ -1,4 +1,4 @@
-import { ArrowRight, Calculator, Shield, Clock, BarChartIcon as ChartBar, Scale, HelpCircle } from "lucide-react"
+import { ArrowRight, Calculator, Shield, Clock, BarChartIcon as ChartBar, Scale, HelpCircle, DollarSign } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
@@ -6,40 +6,41 @@ const features = [
   {
     title: "Official SACAT Formulas",
     description:
-      "Uses the exact formulas prescribed by SACAT for both advertising costs and reletting fees, including GST calculations and term adjustments.",
+      "Uses the exact formulas prescribed by SACAT for both advertising costs and reletting fees, ensuring precise GST calculations and term adjustments.",
     icon: Shield,
   },
   {
-    title: "Comprehensive Calculations",
+    title: "Comprehensive Cost Calculations",
     description:
-      "Automatically handles complex calculations including three-quarter term adjustments, GST additions, and maximum fee limits as per SACAT guidelines.",
+      "Automatically manages complex calculations including three-quarter term adjustments, GST additions, and maximum fee limits as per SACAT guidelines.",
     icon: Calculator,
   },
   {
-    title: "Cost Breakdown",
+    title: "Detailed Cost Breakdown",
     description:
-      "Clear breakdown of all costs including advertising fees, reletting charges, and maximum rent liability periods based on your lease term.",
+      "Provides a transparent breakdown of all costs, including advertising fees, reletting charges, and rent liability periods based on your lease term.",
     icon: ChartBar,
   },
   {
-    title: "Flexible Input Options",
+    title: "Landlord’s Income Breakdown",
     description:
-      "Choose between direct week input or date-based calculations, with automatic conversion between different term lengths (6 months to 3 years).",
-    icon: Scale,
+      "Track your rental income, expenses, and net returns with a detailed financial breakdown, including maintenance, insurance, and council levies.",
+    icon: DollarSign,
   },
   {
-    title: "Instant Results",
+    title: "Instant & Flexible Results",
     description:
-      "Get immediate calculations for both advertising and reletting fees, helping you make informed decisions about early lease termination.",
+      "Get immediate calculations for reletting and advertising fees. Choose between direct week input or date-based calculations for different lease terms.",
     icon: Clock,
   },
   {
-    title: "Compliance Guidance",
+    title: "Legal & Compliance Guidance",
     description:
-      "Includes information about landlord obligations, property advertising requirements, and links to official SACAT resources.",
+      "Stay informed with compliance details, landlord obligations, and official SACAT resources to ensure proper adherence to rental laws.",
     icon: HelpCircle,
   },
 ]
+
 
 export function AboutSection() {
   return (

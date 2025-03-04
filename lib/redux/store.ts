@@ -1,19 +1,28 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { persistStore, persistReducer } from 'redux-persist'
 import calculatorReducer from './calculatorSlice'
+import landlordIncomeReducer from './landlordIncomeSlice'
 import storage from './customStorage'
 
-const persistConfig = {
-  key: 'root',
+const calculatorPersistConfig = {
+  key: 'calculator',
   storage,
-  whitelist: ['calculator'] // only calculator will be persisted
+  whitelist: ['calculator']
 }
 
-const persistedReducer = persistReducer(persistConfig, calculatorReducer)
+const landlordIncomePersistConfig = {
+  key: 'landlordIncome',
+  storage,
+  whitelist: ['rows', 'interestPercentage']
+}
+
+const persistedCalculatorReducer = persistReducer(calculatorPersistConfig, calculatorReducer)
+const persistedLandlordIncomeReducer = persistReducer(landlordIncomePersistConfig, landlordIncomeReducer)
 
 export const store = configureStore({
   reducer: {
-    calculator: persistedReducer,
+    calculator: persistedCalculatorReducer,
+    landlordIncome: persistedLandlordIncomeReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
