@@ -186,7 +186,7 @@ export function LandlordIncomeCalculator() {
     defaultValues,
   })
 
-  const { control, watch } = form
+  const { control, watch, setValue } = form
   const { fields, append, remove } = useFieldArray({
     control,
     name: "rows",
@@ -243,6 +243,19 @@ export function LandlordIncomeCalculator() {
 
   // Handle calculate button click
   const handleCalculate = () => {
+    // Update final income for each row
+    const updatedRows = watchedRows.map(row => ({
+      ...row,
+      finalIncome: calculateRowFinalIncome(row)
+    }))
+    
+    // Update form values
+    updatedRows.forEach((row, index) => {
+      setValue(`rows.${index}.finalIncome`, row.finalIncome)
+    })
+    
+    // Update Redux state
+    dispatch(setRows(updatedRows))
     dispatch(updateCalculations())
   }
 
@@ -610,6 +623,7 @@ export function LandlordIncomeCalculator() {
                   finalIncome: row.finalIncome,
                 }))}
                 config={{
+                  // Chart configuration
                   rent: {
                     label: "Rental Income",
                     color: "hsl(142, 76%, 36%)" // Green
@@ -636,21 +650,42 @@ export function LandlordIncomeCalculator() {
                   tickFormatter={(value: number) => formatCurrency(value)}
                   width={80}
                 />
-                <ChartLine
-                  dataKey="rent"
-                  stroke="var(--color-rent)"
-                  strokeWidth={2}
-                />
-                <ChartLine
-                  dataKey="expenses"
-                  stroke="var(--color-expenses)"
-                  strokeWidth={2}
-                />
-                <ChartLine
-                  dataKey="finalIncome"
-                  stroke="var(--color-finalIncome)"
-                  strokeWidth={2.5}
-                />
+                {/* Define chart configuration */}
+                {(() => {
+                  const chartConfig = {
+                    rent: {
+                      label: "Rental Income",
+                      color: "hsl(142, 76%, 36%)" // Green
+                    },
+                    expenses: {
+                      label: "Total Expenses",
+                      color: "hsl(0, 84%, 60%)" // Red
+                    },
+                    finalIncome: {
+                      label: "Final Income",
+                      color: "hsl(217, 91%, 60%)" // Blue
+                    }
+                  }
+                  return (
+                    <>
+                      <ChartLine
+                        dataKey="rent"
+                        stroke={chartConfig.rent.color}
+                        strokeWidth={2}
+                      />
+                      <ChartLine
+                        dataKey="expenses"
+                        stroke={chartConfig.expenses.color}
+                        strokeWidth={2}
+                      />
+                      <ChartLine
+                        dataKey="finalIncome"
+                        stroke={chartConfig.finalIncome.color}
+                        strokeWidth={2.5}
+                      />
+                    </>
+                  )
+                })()}
                 <ChartTooltip formatter={formatCurrency} />
               </ChartContainer>
             </div>

@@ -1,14 +1,12 @@
-"use client"
-
-import * as React from "react"
+import React from "react"
 import {
+  ResponsiveContainer,
   LineChart,
+  Tooltip,
   Line,
+  CartesianGrid,
   XAxis,
   YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
 } from "recharts"
 import { cn } from "@/lib/utils"
 
@@ -19,21 +17,14 @@ export interface ChartConfig {
   }
 }
 
-interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
-  data: ChartData[]
-  config: ChartConfig
-  children?: React.ReactNode
-}
-
 interface ChartData {
   [key: string]: string | number
 }
 
-interface ChartProps {
+interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
   data: ChartData[]
   config: ChartConfig
   children?: React.ReactNode
-  className?: string
 }
 
 export function ChartContainer({
@@ -45,11 +36,36 @@ export function ChartContainer({
 }: ChartProps) {
   // Create CSS variables for chart colors
   React.useEffect(() => {
-    const root = document.documentElement
-    Object.entries(config).forEach(([key, value]) => {
-      root.style.setProperty(`--color-${key}`, value.color)
-    })
+    if (!config) return
+
+    const style = document.createElement("style")
+    const cssVars = Object.entries(config)
+      .map(([key, value]) => `--color-${key}: ${value.color};`)
+      .join("\n")
+    style.textContent = `:root { ${cssVars} }`
+    document.head.appendChild(style)
+
+    // Cleanup function
+    return () => {
+      if (style.parentNode) {
+        style.parentNode.removeChild(style)
+      }
+    }
   }, [config])
+
+  if (!data?.length) {
+    return (
+      <div
+        className={cn(
+          "h-[350px] w-full flex items-center justify-center text-muted-foreground",
+          className
+        )}
+        {...props}
+      >
+        No data available
+      </div>
+    )
+  }
 
   return (
     <div className={cn("h-[350px] w-full", className)} {...props}>
@@ -104,15 +120,16 @@ export function ChartTooltipContent({
           <div className="font-medium">{label}</div>
           <div className="grid gap-1">
             {payload.map((item, index) => (
-              <div key={index} className="flex items-center justify-between gap-2">
+              <div
+                key={index}
+                className="flex items-center justify-between gap-2"
+              >
                 <div className="flex items-center gap-1">
                   <div
                     className="h-2 w-2 rounded-full"
                     style={{ background: item.color }}
                   />
-                  <span className="text-muted-foreground">
-                    {item.name}
-                  </span>
+                  <span className="text-muted-foreground">{item.name}</span>
                 </div>
                 <div className="font-medium">
                   {formatter(item.value as number)}
@@ -152,7 +169,10 @@ export function ChartLine({
   )
 }
 
-export function ChartGrid({ className, ...props }: React.ComponentProps<typeof CartesianGrid>) {
+export function ChartGrid({
+  className,
+  ...props
+}: React.ComponentProps<typeof CartesianGrid>) {
   return (
     <CartesianGrid
       className={cn("", className)}
