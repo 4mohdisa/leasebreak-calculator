@@ -9,7 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  TooltipProps,
 } from "recharts"
 import { cn } from "@/lib/utils"
 
@@ -20,13 +19,14 @@ export interface ChartConfig {
   }
 }
 
-interface ChartContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+interface ChartProps extends React.HTMLAttributes<HTMLDivElement> {
+  data: ChartData[]
   config: ChartConfig
-  children: React.ReactNode
+  children?: React.ReactNode
 }
 
 interface ChartData {
-  [key: string]: any
+  [key: string]: string | number
 }
 
 interface ChartProps {
@@ -86,7 +86,7 @@ export function ChartTooltip({
 
 interface ChartTooltipContentProps {
   active?: boolean
-  payload?: any[]
+  payload?: Array<{ color: string; name: string; value: number }>
   label?: string
   formatter?: (value: number) => string
 }
@@ -140,7 +140,6 @@ export function ChartLine({
   stroke,
   strokeWidth = 2,
   dot = false,
-  className,
 }: ChartLineProps) {
   return (
     <Line
@@ -153,10 +152,7 @@ export function ChartLine({
   )
 }
 
-export function ChartGrid({
-  className,
-  ...props
-}: React.ComponentProps<typeof CartesianGrid>) {
+export function ChartGrid({ className, ...props }: React.ComponentProps<typeof CartesianGrid>) {
   return (
     <CartesianGrid
       className={cn("", className)}

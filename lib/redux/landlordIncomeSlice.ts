@@ -84,7 +84,7 @@ export const landlordIncomeSlice = createSlice({
       state.finalTotal = Number(calculatedFinalTotal.toFixed(2))
       state.totalRemainingIncome = Number(calculatedIncomeAfterLoan.toFixed(2))
     },
-    resetCalculator: (state) => {
+    resetCalculator: () => {
       return initialState
     }
   }

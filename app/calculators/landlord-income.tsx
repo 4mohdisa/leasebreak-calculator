@@ -11,9 +11,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Download, Calculator } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/lib/redux/store"
-import { setRows, updateRow, addRow, removeRow, setInterestPercentage, updateCalculations } from "@/lib/redux/landlordIncomeSlice"
+import { setRows, addRow, removeRow, setInterestPercentage, updateCalculations } from "@/lib/redux/landlordIncomeSlice"
 import { FormLabel } from "@/components/ui/form"
-import { format } from 'date-fns';
+// import { format } from 'date-fns';
 import { ChartContainer, ChartGrid, ChartTooltip, ChartXAxis, ChartYAxis, ChartLine } from "@/components/ui/chart"
 
 // Define the type for a single row of data
@@ -145,32 +145,7 @@ function calculateRowFinalIncome(row: Partial<IncomeRow>): number {
   return Number.parseFloat((income - expenses).toFixed(2))
 }
 
-// Calculate summary values
-function calculateSummary(
-  rows: IncomeRow[], 
-  interestPercentage: number
-): { 
-  homeLoanInterest: number, 
-  totalRemainingIncome: number 
-} {
-  const totalFinalIncome = rows.reduce((sum, row) => sum + (row.finalIncome || 0), 0)
-  const calculatedHomeLoanInterest = totalFinalIncome * (interestPercentage / 100)
-  const calculatedRemainingIncome = totalFinalIncome - calculatedHomeLoanInterest
 
-  return {
-    homeLoanInterest: Number.parseFloat(calculatedHomeLoanInterest.toFixed(2)),
-    totalRemainingIncome: Number.parseFloat(calculatedRemainingIncome.toFixed(2))
-  }
-}
-
-// Format currency
-function formatCurrency(value: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-  }).format(value)
-}
 
 export function LandlordIncomeCalculator() {
   const dispatch = useDispatch()
@@ -237,7 +212,7 @@ export function LandlordIncomeCalculator() {
       dispatch(setRows(defaultValues.rows))
       dispatch(updateCalculations())
     }
-  }, [])
+  }, [dispatch, rows?.length, defaultValues.rows])
 
   // Calculate totals for each column
   const calculateColumnTotals = () => {
@@ -309,7 +284,7 @@ export function LandlordIncomeCalculator() {
   return (
     <Card className="w-full mx-auto">
       <CardHeader>
-        <CardTitle>Landlord's Income Breakdown</CardTitle>
+        <CardTitle>Landlord&apos;s Income Breakdown</CardTitle>
         <CardDescription>Calculate and track your property income, expenses, and net returns</CardDescription>
       </CardHeader>
       <CardContent>
@@ -658,7 +633,7 @@ export function LandlordIncomeCalculator() {
                 />
                 <ChartYAxis
                   tickCount={5}
-                  tickFormatter={(value: any) => formatCurrency(value)}
+                  tickFormatter={(value: number) => formatCurrency(value)}
                   width={80}
                 />
                 <ChartLine

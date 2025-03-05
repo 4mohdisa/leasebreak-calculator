@@ -1,4 +1,4 @@
-import { ArrowRight, Calculator, Shield, Clock, BarChartIcon as ChartBar, Scale, HelpCircle, DollarSign } from "lucide-react"
+import { ArrowRight, Calculator, Shield, Clock, BarChartIcon as ChartBar, HelpCircle, DollarSign } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
