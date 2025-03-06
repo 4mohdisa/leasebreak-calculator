@@ -5,8 +5,7 @@ import { Footer } from "./components/footer"
 import { ThemeProvider } from "@/components/theme-provider"
 import { ReduxProvider } from "@/lib/redux/provider"
 import "./globals.css"
-import { Analytics } from "@vercel/analytics/react"
-import GoogleAnalytics from "./components/GoogleAnalytics"
+import { GoogleAnalytics } from '@next/third-parties/google'
 import { ContactSection } from "./components/contact-section"
 import { generateCalculatorSchema, generateOrganizationSchema } from '@/lib/schema'
 
@@ -95,7 +94,6 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <GoogleAnalytics GA_MEASUREMENT_ID="G-8P22ZMV89E" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -113,7 +111,7 @@ export default function RootLayout({
         <ReduxProvider>
           <ThemeProvider
             attribute="class"
-            defaultTheme="system"
+            defaultTheme="light"
             enableSystem
             disableTransitionOnChange
           >
@@ -127,7 +125,7 @@ export default function RootLayout({
             </div>
           </ThemeProvider>
         </ReduxProvider>
-        <Analytics />
+        <GoogleAnalytics gaId="G-8P7J41FWCV" />
       </body>
     </html>
   )

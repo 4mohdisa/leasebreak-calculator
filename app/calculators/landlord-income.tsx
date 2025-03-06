@@ -14,7 +14,8 @@ import { RootState } from "@/lib/redux/store"
 import { setRows, addRow, removeRow, setInterestPercentage, updateCalculations } from "@/lib/redux/landlordIncomeSlice"
 import { FormLabel } from "@/components/ui/form"
 // import { format } from 'date-fns';
-import { ChartContainer, ChartGrid, ChartTooltip, ChartXAxis, ChartYAxis, ChartLine } from "@/components/ui/chart"
+import { LandlordIncomeChart } from "@/components/landlord-income-chart"
+import { trackButtonClick, trackCalculation, trackDownload } from "@/lib/ga-events"
 
 // Define the type for a single row of data
 type IncomeRow = {
@@ -257,6 +258,13 @@ export function LandlordIncomeCalculator() {
     // Update Redux state
     dispatch(setRows(updatedRows))
     dispatch(updateCalculations())
+
+    // Track calculation event
+    trackCalculation('landlord_income', {
+      num_rows: watchedRows.length,
+      total_income: totalIncomeBeforeLoan,
+      interest_percentage: interestPercentage
+    })
   }
 
   // Add a new row
@@ -278,11 +286,17 @@ export function LandlordIncomeCalculator() {
     append(newRow)
     dispatch(addRow(newRow))
     dispatch(updateCalculations())
+
+    // Track add row event
+    trackButtonClick('add_row', 'landlord_income')
   }
 
   // Download as CSV
   const handleDownloadCSV = () => {
     downloadLandlordIncomeCSV(rows, homeLoanInterest, totalRemainingIncome, interestPercentage)
+    
+    // Track download event
+    trackDownload('csv', 'landlord_income_data')
   }
 
   // Format currency
@@ -602,95 +616,25 @@ export function LandlordIncomeCalculator() {
           </Card>
         </div>
         {/* Income and Expenses Chart */}
-        <Card className="mt-6">
-          <CardHeader>
-            <CardTitle>Income and Expenses Over Time</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="h-[400px]">
-              <ChartContainer
-                data={watchedRows.map((row) => ({
-                  month: row.month,
-                  rent: row.rent,
-                  expenses:
-                    row.realtorFees +
-                    row.homeInsurance +
-                    row.propertyMaintenance +
-                    row.councilLevy +
-                    row.waterSewer +
-                    row.electricity +
-                    row.gas,
-                  finalIncome: row.finalIncome,
-                }))}
-                config={{
-                  // Chart configuration
-                  rent: {
-                    label: "Rental Income",
-                    color: "hsl(142, 76%, 36%)" // Green
-                  },
-                  expenses: {
-                    label: "Total Expenses",
-                    color: "hsl(0, 84%, 60%)" // Red
-                  },
-                  finalIncome: {
-                    label: "Final Income",
-                    color: "hsl(217, 91%, 60%)" // Blue
-                  }
-                }}
-              >
-                <ChartGrid vertical={false} />
-                <ChartXAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tickFormatter={(value: string) => value.split(" ")[0].substring(0, 3)}
-                />
-                <ChartYAxis
-                  tickCount={5}
-                  tickFormatter={(value: number) => formatCurrency(value)}
-                  width={80}
-                />
-                {/* Define chart configuration */}
-                {(() => {
-                  const chartConfig = {
-                    rent: {
-                      label: "Rental Income",
-                      color: "hsl(142, 76%, 36%)" // Green
-                    },
-                    expenses: {
-                      label: "Total Expenses",
-                      color: "hsl(0, 84%, 60%)" // Red
-                    },
-                    finalIncome: {
-                      label: "Final Income",
-                      color: "hsl(217, 91%, 60%)" // Blue
-                    }
-                  }
-                  return (
-                    <>
-                      <ChartLine
-                        dataKey="rent"
-                        stroke={chartConfig.rent.color}
-                        strokeWidth={2}
-                      />
-                      <ChartLine
-                        dataKey="expenses"
-                        stroke={chartConfig.expenses.color}
-                        strokeWidth={2}
-                      />
-                      <ChartLine
-                        dataKey="finalIncome"
-                        stroke={chartConfig.finalIncome.color}
-                        strokeWidth={2.5}
-                      />
-                    </>
-                  )
-                })()}
-                <ChartTooltip formatter={formatCurrency} />
-              </ChartContainer>
-            </div>
-          </CardContent>
-        </Card>
+        <div className="mt-6">
+          <LandlordIncomeChart
+            data={watchedRows.map((row) => ({
+              month: row.month,
+              rent: row.rent,
+              expenses:
+                row.realtorFees +
+                row.homeInsurance +
+                row.propertyMaintenance +
+                row.councilLevy +
+                row.waterSewer +
+                row.electricity +
+                row.gas,
+              finalIncome: row.finalIncome,
+            }))}
+            totalIncome={totalIncomeBeforeLoan}
+            previousTotalIncome={rows.length > 1 ? rows[rows.length - 2].finalIncome : undefined}
+          />
+        </div>
       </CardContent>
       <CardFooter className="flex flex-col items-start text-sm text-muted-foreground">
         <p>Note: Final Income = (Rent + Tenant Paid Bills) - (All Expenses)</p>
