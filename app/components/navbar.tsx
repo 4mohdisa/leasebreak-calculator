@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import {
   NavigationMenu,
@@ -9,82 +10,53 @@ import {
 } from "@/components/ui/navigation-menu"
 import { ThemeToggle } from "@/components/theme-toggle"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useSmoothScroll } from "@/app/hooks/use-smooth-scroll"
-import { useActiveSection } from "@/app/hooks/use-active-section"
 import { cn } from "@/lib/utils"
 import React from "react"
 import { Menu } from "lucide-react"
 
-const SECTIONS = ["leasebreakcalculator", "about", "support", "contact"]
-
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false)
-  const scrollToSection = useSmoothScroll()
-  const activeSection = useActiveSection(SECTIONS)
+  const pathname = usePathname()
 
   const closeMenu = () => setIsOpen(false)
 
   const MenuItems = () => (
     <>
       <NavigationMenuItem>
-        <a
-          href="#leasebreakcalculator"
-          onClick={(e) => {
-            scrollToSection(e, "leasebreakcalculator")
-            closeMenu()
-          }}
+        <Link
+          href="/"
+          onClick={closeMenu}
           className={cn(
             "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
-            activeSection === "leasebreakcalculator" && "bg-accent text-accent-foreground"
+            pathname === "/" && "bg-accent text-accent-foreground"
           )}
         >
-          Calculators
-        </a>
+          Home
+        </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <a
-          href="#about"
-          onClick={(e) => {
-            scrollToSection(e, "about")
-            closeMenu()
-          }}
+        <Link
+          href="/calculators"
+          onClick={closeMenu}
           className={cn(
             "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
-            activeSection === "about" && "bg-accent text-accent-foreground"
+            pathname === "/calculators" && "bg-accent text-accent-foreground"
           )}
         >
-          About
-        </a>
+          Lease Calculators
+        </Link>
       </NavigationMenuItem>
       <NavigationMenuItem>
-        <a
-          href="#support"
-          onClick={(e) => {
-            scrollToSection(e, "support")
-            closeMenu()
-          }}
+        <Link
+          href="/landlord-income"
+          onClick={closeMenu}
           className={cn(
             "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
-            activeSection === "support" && "bg-accent text-accent-foreground"
+            pathname === "/landlord-income" && "bg-accent text-accent-foreground"
           )}
         >
-          Support
-        </a>
-      </NavigationMenuItem>
-      <NavigationMenuItem>
-        <a
-          href="#contact"
-          onClick={(e) => {
-            scrollToSection(e, "contact")
-            closeMenu()
-          }}
-          className={cn(
-            "py-2 px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground rounded-sm",
-            activeSection === "contact" && "bg-accent text-accent-foreground"
-          )}
-        >
-          Contact
-        </a>
+          Landlord Income
+        </Link>
       </NavigationMenuItem>
     </>
   )
