@@ -14,6 +14,8 @@ import {
 import {
   ChartConfig,
   ChartContainer,
+  ChartLegend,
+  ChartLegendContent,
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart"
@@ -85,31 +87,32 @@ export function LandlordIncomeChart({ data, totalIncome, previousTotalIncome }: 
             cursor={false} 
             content={<ChartTooltipContent />}
             formatter={(value: number) =>
-              new Intl.NumberFormat("en-US", {
+              new Intl.NumberFormat("en-AU", {
                 style: "currency",
-                currency: "USD",
+                currency: "AUD",
               }).format(value)
             }
           />
+          <ChartLegend content={<ChartLegendContent />} />
           <Line
             dataKey="rent"
             type="monotone"
             stroke="var(--color-rent)"
-            strokeWidth={1}
+            strokeWidth={2}
             dot={false}
           />
           <Line
             dataKey="expenses"
             type="monotone"
             stroke="var(--color-expenses)"
-            strokeWidth={1}
+            strokeWidth={2}
             dot={false}
           />
           <Line
             dataKey="finalIncome"
             type="monotone"
             stroke="var(--color-finalIncome)"
-            strokeWidth={1}
+            strokeWidth={2}
             dot={false}
           />
         </LineChart>
@@ -134,9 +137,9 @@ export function LandlordIncomeChart({ data, totalIncome, previousTotalIncome }: 
             </div>
           )}
           <div className="flex items-center gap-2 leading-none text-muted-foreground">
-            Total Income: {new Intl.NumberFormat("en-US", {
+            Total Income: {new Intl.NumberFormat("en-AU", {
               style: "currency",
-              currency: "USD",
+              currency: "AUD",
             }).format(totalIncome)}
           </div>
         </div>
