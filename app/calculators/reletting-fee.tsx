@@ -32,6 +32,7 @@ export function RelettingFeeCalculator() {
   const {
     useDates,
     baseWeeklyRent,
+    lettingFeeWeeks,
     term,
     weeksRemaining,
     moveOutDate,
@@ -54,6 +55,16 @@ export function RelettingFeeCalculator() {
     if (isNaN(baseRent) || baseRent <= 0) {
       dispatch(updateRelettingFee({ 
         error: "Please enter a valid weekly rent amount",
+        calculatedFee: null 
+      }))
+      return
+    }
+
+    // Validate letting fee weeks
+    const lettingFee = parseFloat(lettingFeeWeeks)
+    if (isNaN(lettingFee) || lettingFee <= 0 || lettingFee > 2) {
+      dispatch(updateRelettingFee({ 
+        error: "Letting fee must be between 0 and 2",
         calculatedFee: null 
       }))
       return
@@ -129,14 +140,14 @@ export function RelettingFeeCalculator() {
       // Calculate GST inclusive weekly rent (10% GST)
       const weeklyRentWithGST = baseRent * 1.1
 
-      // Calculate two weeks rent with GST
-      const twoWeeksRentWithGST = weeklyRentWithGST * 2
+      // Calculate letting fee weeks rent with GST
+      const lettingFeeRentWithGST = weeklyRentWithGST * lettingFee
 
       // Calculate three quarters term
       const threeQuartersTerm = Math.round(term * 0.75)
 
       // Calculate the reletting fee
-      const relettingFee = (twoWeeksRentWithGST * remainingWeeks) / threeQuartersTerm
+      const relettingFee = (lettingFeeRentWithGST * remainingWeeks) / threeQuartersTerm
 
       // Add the tracking event
       gaEvent({
@@ -181,6 +192,19 @@ export function RelettingFeeCalculator() {
                 value={baseWeeklyRent}
                 onChange={(e) => dispatch(updateRelettingFee({ baseWeeklyRent: e.target.value }))}
                 placeholder="Enter base weekly rent"
+              />
+            </div>
+
+            <div>
+              <Label>Letting Fee (in weeks, max 2)</Label>
+              <Input
+                type="number"
+                step="0.1"
+                min="0"
+                max="2"
+                value={lettingFeeWeeks}
+                onChange={(e) => dispatch(updateRelettingFee({ lettingFeeWeeks: e.target.value }))}
+                placeholder="e.g., 1.1, 1.5, 2"
               />
             </div>
 

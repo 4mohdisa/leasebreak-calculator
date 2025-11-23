@@ -16,6 +16,7 @@ interface CalculatorState {
   relettingFee: {
     useDates: boolean
     baseWeeklyRent: string
+    lettingFeeWeeks: string
     term: number
     weeksRemaining: string
     moveOutDate: string | null
@@ -52,6 +53,7 @@ const initialState: CalculatorState = {
   relettingFee: {
     useDates: false,
     baseWeeklyRent: '',
+    lettingFeeWeeks: '1.5',
     term: 52,
     weeksRemaining: '',
     moveOutDate: null,
