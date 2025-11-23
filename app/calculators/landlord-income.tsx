@@ -3,19 +3,17 @@
 import { useEffect } from "react"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
-import { Form } from "@/components/ui/form"
+import { Form, FormLabel } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Download, Calculator } from "lucide-react"
+import { Download, Calculator, Plus, Trash2, ChevronDown, ChevronUp } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { RootState } from "@/lib/redux/store"
 import { setRows, addRow, removeRow, setInterestPercentage, updateCalculations } from "@/lib/redux/landlordIncomeSlice"
-import { FormLabel } from "@/components/ui/form"
-// import { format } from 'date-fns';
 import { LandlordIncomeChart } from "@/components/landlord-income-chart"
 import { trackButtonClick, trackCalculation, trackDownload } from "@/lib/ga-events"
+import React from "react"
 
 // Define the type for a single row of data
 type IncomeRow = {
@@ -33,39 +31,11 @@ type IncomeRow = {
   finalIncome: number
 }
 
-// Define column keys type
-type ColumnKey = keyof Omit<IncomeRow, 'id'>
-
-// Define column order to match table header
-const COLUMN_ORDER: ColumnKey[] = [
-  'month',
-  'rent',
-  'realtorFees',
-  'homeInsurance',
-  'propertyMaintenance',
-  'councilLevy',
-  'waterSewer',
-  'electricity',
-  'gas',
-  'tenantPaidBills',
-  'finalIncome'
-]
-
 // Generate months for the current and next year
 function generateMonthOptions(): string[] {
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
-    "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December",
   ]
   const currentYear = new Date().getFullYear()
   const nextYear = currentYear + 1
@@ -83,7 +53,6 @@ function downloadLandlordIncomeCSV(
   totalRemainingIncome: number, 
   interestPercentage: number
 ): void {
-  // Create headers
   const headers = [
     "Month", "Rent", "Realtor Fees", "Home Insurance", 
     "Property Maintenance", "Council & Emergency Levy", 
@@ -91,33 +60,17 @@ function downloadLandlordIncomeCSV(
     "Tenant Paid Bills", "Final Income"
   ]
 
-  // Format data
   const data = rows.map((row) => [
-    row.month,
-    row.rent,
-    row.realtorFees,
-    row.homeInsurance,
-    row.propertyMaintenance,
-    row.councilLevy,
-    row.waterSewer,
-    row.electricity,
-    row.gas,
-    row.tenantPaidBills,
-    row.finalIncome
+    row.month, row.rent, row.realtorFees, row.homeInsurance,
+    row.propertyMaintenance, row.councilLevy, row.waterSewer,
+    row.electricity, row.gas, row.tenantPaidBills, row.finalIncome
   ])
 
-  // Add summary rows
   data.push([])
   data.push([`Home Loan Interest (${interestPercentage}%)`, "", "", "", "", "", "", "", "", "", homeLoanInterest])
   data.push(["Total Remaining Income", "", "", "", "", "", "", "", "", "", totalRemainingIncome])
 
-  // Convert to CSV
-  const csvContent = [
-    headers.join(","), 
-    ...data.map((row) => row.join(","))
-  ].join("\n")
-
-  // Create download link
+  const csvContent = [headers.join(","), ...data.map((row) => row.join(","))].join("\n")
   const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
   const url = URL.createObjectURL(blob)
   const link = document.createElement("a")
@@ -146,11 +99,10 @@ function calculateRowFinalIncome(row: Partial<IncomeRow>): number {
   return Number.parseFloat((income - expenses).toFixed(2))
 }
 
-
-
 export function LandlordIncomeCalculator() {
   const dispatch = useDispatch()
   const monthOptions = generateMonthOptions()
+  const [expandedCards, setExpandedCards] = React.useState<Set<string>>(new Set())
   
   const {
     rows,
@@ -163,7 +115,6 @@ export function LandlordIncomeCalculator() {
     finalTotal
   } = useSelector((state: RootState) => state.landlordIncome)
 
-  // Initialize with one empty row if no rows exist
   const defaultValues = {
     rows: rows?.length > 0 ? rows : [
       {
@@ -183,10 +134,7 @@ export function LandlordIncomeCalculator() {
     ],
   }
 
-  const form = useForm({
-    defaultValues,
-  })
-
+  const form = useForm({ defaultValues })
   const { control, watch, setValue } = form
   const { fields, append, remove } = useFieldArray({
     control,
@@ -194,6 +142,19 @@ export function LandlordIncomeCalculator() {
   })
 
   const watchedRows = watch("rows")
+
+  // Toggle card expansion
+  const toggleCard = (id: string) => {
+    setExpandedCards(prev => {
+      const newSet = new Set(prev)
+      if (newSet.has(id)) {
+        newSet.delete(id)
+      } else {
+        newSet.add(id)
+      }
+      return newSet
+    })
+  }
 
   // Update Redux state when rows change
   useEffect(() => {
@@ -215,51 +176,20 @@ export function LandlordIncomeCalculator() {
     }
   }, [dispatch, rows?.length, defaultValues.rows])
 
-  // Calculate totals for each column
-  const calculateColumnTotals = () => {
-    const totals: Record<ColumnKey, number> = {
-      month: 0, // This will be ignored in display
-      rent: 0,
-      realtorFees: 0,
-      homeInsurance: 0,
-      propertyMaintenance: 0,
-      councilLevy: 0,
-      waterSewer: 0,
-      electricity: 0,
-      gas: 0,
-      tenantPaidBills: 0,
-      finalIncome: 0
-    }
-
-    watchedRows.forEach(row => {
-      (Object.keys(totals) as ColumnKey[]).forEach(key => {
-        if (key !== 'month') {
-          totals[key] += Number(row[key] || 0)
-        }
-      })
-    })
-
-    return totals
-  }
-
   // Handle calculate button click
   const handleCalculate = () => {
-    // Update final income for each row
     const updatedRows = watchedRows.map(row => ({
       ...row,
       finalIncome: calculateRowFinalIncome(row)
     }))
     
-    // Update form values
     updatedRows.forEach((row, index) => {
       setValue(`rows.${index}.finalIncome`, row.finalIncome)
     })
     
-    // Update Redux state
     dispatch(setRows(updatedRows))
     dispatch(updateCalculations())
 
-    // Track calculation event
     trackCalculation('landlord_income', {
       num_rows: watchedRows.length,
       total_income: totalIncomeBeforeLoan,
@@ -286,24 +216,21 @@ export function LandlordIncomeCalculator() {
     append(newRow)
     dispatch(addRow(newRow))
     dispatch(updateCalculations())
-
-    // Track add row event
+    setExpandedCards(prev => new Set(prev).add(newRow.id))
     trackButtonClick('add_row', 'landlord_income')
   }
 
   // Download as CSV
   const handleDownloadCSV = () => {
     downloadLandlordIncomeCSV(rows, homeLoanInterest, totalRemainingIncome, interestPercentage)
-    
-    // Track download event
     trackDownload('csv', 'landlord_income_data')
   }
 
   // Format currency
   const formatCurrency = (value: number) => {
-    return new Intl.NumberFormat("en-US", {
+    return new Intl.NumberFormat("en-AU", {
       style: "currency",
-      currency: "USD",
+      currency: "AUD",
       minimumFractionDigits: 2,
     }).format(value)
   }
@@ -316,246 +243,284 @@ export function LandlordIncomeCalculator() {
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <div className="w-full overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Month</TableHead>
-                  <TableHead>Rent</TableHead>
-                  <TableHead>Realtor Fees</TableHead>
-                  <TableHead>Home Insurance</TableHead>
-                  <TableHead>Property Maintenance</TableHead>
-                  <TableHead>Council & Emergency Levy</TableHead>
-                  <TableHead>Water & Sewer</TableHead>
-                  <TableHead>Electricity</TableHead>
-                  <TableHead>Gas</TableHead>
-                  <TableHead>Tenant Paid Bills</TableHead>
-                  <TableHead>Final Income</TableHead>
-                  <TableHead></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {fields.map((field, index) => (
-                  <TableRow key={field.id}>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.month`}
-                        render={({ field }) => (
-                          <Select value={field.value} onValueChange={field.onChange}>
-                            <SelectTrigger className="w-[180px]">
-                              <SelectValue placeholder="Select month" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {monthOptions.map((month) => (
-                                <SelectItem key={month} value={month}>
-                                  {month}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.rent`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.realtorFees`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.homeInsurance`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.propertyMaintenance`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.councilLevy`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.waterSewer`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.electricity`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.gas`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.tenantPaidBills`}
-                        render={({ field }) => (
-                          <Input
-                            type="number"
-                            {...field}
-                            onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
-                            className="w-[100px]"
-                          />
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Controller
-                        control={control}
-                        name={`rows.${index}.finalIncome`}
-                        render={({ field }) => (
-                          <div className="w-[100px] px-3 py-2 border rounded-md bg-muted">
-                            {formatCurrency(field.value)}
+          <div className="space-y-4">
+            {/* Monthly Cards */}
+            {fields.map((field, index) => {
+              const isExpanded = expandedCards.has(field.id)
+              const currentRow = watchedRows[index]
+              
+              return (
+                <Card key={field.id} className="border-2">
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1">
+                        <Controller
+                          control={control}
+                          name={`rows.${index}.month`}
+                          render={({ field }) => (
+                            <Select value={field.value} onValueChange={field.onChange}>
+                              <SelectTrigger className="w-full max-w-[200px]">
+                                <SelectValue placeholder="Select month" />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {monthOptions.map((month) => (
+                                  <SelectItem key={month} value={month}>
+                                    {month}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          )}
+                        />
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="text-right">
+                          <p className="text-sm text-muted-foreground">Net Income</p>
+                          <p className={`text-lg font-bold ${currentRow.finalIncome < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                            {formatCurrency(currentRow.finalIncome)}
+                          </p>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => toggleCard(field.id)}
+                        >
+                          {isExpanded ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
+                        </Button>
+                      </div>
+                    </div>
+                  </CardHeader>
+
+                  {isExpanded && (
+                    <CardContent className="space-y-4 pt-0">
+                      {/* Income Section */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-sm text-green-600">Income</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <FormLabel className="text-xs">Rent</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.rent`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
                           </div>
-                        )}
-                      />
-                    </TableCell>
-                    <TableCell>
+                          <div>
+                            <FormLabel className="text-xs">Tenant Paid Bills</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.tenantPaidBills`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Expenses Section */}
+                      <div className="space-y-3">
+                        <h4 className="font-semibold text-sm text-red-600">Expenses</h4>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <FormLabel className="text-xs">Realtor Fees</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.realtorFees`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Home Insurance</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.homeInsurance`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Property Maintenance</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.propertyMaintenance`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Council & Emergency Levy</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.councilLevy`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Water & Sewer</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.waterSewer`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Electricity</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.electricity`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                          <div>
+                            <FormLabel className="text-xs">Gas</FormLabel>
+                            <Controller
+                              control={control}
+                              name={`rows.${index}.gas`}
+                              render={({ field }) => (
+                                <Input
+                                  type="number"
+                                  {...field}
+                                  onChange={(e) => field.onChange(Number.parseFloat(e.target.value) || 0)}
+                                  placeholder="0.00"
+                                />
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Remove Button */}
                       {fields.length > 1 && (
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
                           onClick={() => {
                             remove(index)
                             dispatch(removeRow(index))
-                          }} 
-                          className="h-8 w-8 p-0"
+                            setExpandedCards(prev => {
+                              const newSet = new Set(prev)
+                              newSet.delete(field.id)
+                              return newSet
+                            })
+                          }}
+                          className="w-full"
                         >
-                          ✕
+                          <Trash2 className="h-4 w-4 mr-2" />
+                          Remove Month
                         </Button>
                       )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-                {/* Summary Row */}
-                <TableRow className="font-medium bg-muted/50">
-                  <TableCell>Total</TableCell>
-                  {COLUMN_ORDER.slice(1).map(key => (
-                    <TableCell key={key}>
-                      {formatCurrency(calculateColumnTotals()[key])}
-                    </TableCell>
-                  ))}
-                  <TableCell /> {/* Empty cell for the remove button column */}
-                </TableRow>
-              </TableBody>
-            </Table>
-          </div>
+                    </CardContent>
+                  )}
+                </Card>
+              )
+            })}
 
-          <div className="mt-8 mb-4">
-            <div className="flex items-center gap-4">
-              <FormLabel htmlFor="interestPercentage" className="min-w-32">
-                Home Loan Interest Rate:
-              </FormLabel>
-              <div className="flex items-center">
-                <Input
-                  id="interestPercentage"
-                  type="number"
-                  value={interestPercentage}
-                  onChange={(e) => dispatch(setInterestPercentage(Number.parseFloat(e.target.value) || 0))}
-                  className="w-20"
-                  min="0"
-                  max="100"
-                  step="0.1"
-                />
-                <span className="ml-2">%</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-between mt-4">
-            <Button type="button" variant="outline" onClick={handleAddRow}>
+            {/* Add Month Button */}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleAddRow}
+              className="w-full"
+            >
+              <Plus className="h-4 w-4 mr-2" />
               Add Month
             </Button>
-            <div className="space-x-2">
-              <Button type="button" onClick={handleCalculate} className="gap-2">
+
+            {/* Home Loan Interest Rate */}
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                  <FormLabel htmlFor="interestPercentage" className="sm:min-w-[200px]">
+                    Home Loan Interest Rate:
+                  </FormLabel>
+                  <div className="flex items-center gap-2">
+                    <Input
+                      id="interestPercentage"
+                      type="number"
+                      value={interestPercentage}
+                      onChange={(e) => dispatch(setInterestPercentage(Number.parseFloat(e.target.value) || 0))}
+                      className="w-24"
+                      min="0"
+                      max="100"
+                      step="0.1"
+                    />
+                    <span>%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-2">
+              <Button
+                type="button"
+                onClick={handleCalculate}
+                className="flex-1 gap-2"
+              >
                 <Calculator className="h-4 w-4" />
                 Calculate
               </Button>
-              <Button type="button" variant="secondary" onClick={handleDownloadCSV} className="gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={handleDownloadCSV}
+                className="flex-1 gap-2"
+              >
                 <Download className="h-4 w-4" />
                 Download CSV
               </Button>
@@ -563,23 +528,23 @@ export function LandlordIncomeCalculator() {
           </div>
         </Form>
 
-        <div className="mt-8 space-y-6">
-          {/* Primary Stats */}
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card>
+        {/* Summary Cards */}
+        <div className="mt-8 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Card className="bg-blue-50 dark:bg-blue-950">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Home Loan Interest ({interestPercentage}%)</CardTitle>
+                <CardTitle className="text-base">Home Loan Interest ({interestPercentage}%)</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">{formatCurrency(homeLoanInterest)}</p>
               </CardContent>
             </Card>
-            <Card>
+            <Card className="bg-green-50 dark:bg-green-950">
               <CardHeader className="pb-2">
-                <CardTitle className="text-lg">Total Remaining Income</CardTitle>
+                <CardTitle className="text-base">Total Remaining Income</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-2xl font-bold">{formatCurrency(totalRemainingIncome)}</p>
+                <p className="text-2xl font-bold text-green-600">{formatCurrency(totalRemainingIncome)}</p>
               </CardContent>
             </Card>
           </div>
@@ -587,34 +552,33 @@ export function LandlordIncomeCalculator() {
           {/* Detailed Breakdown */}
           <Card>
             <CardHeader>
-              <CardTitle>Detailed Financial Breakdown</CardTitle>
+              <CardTitle className="text-lg">Detailed Financial Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Total Income Before Loan</h4>
-                    <p className="text-lg font-semibold mt-1">{formatCurrency(totalIncomeBeforeLoan)}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Income After Loan Applied</h4>
-                    <p className="text-lg font-semibold mt-1">{formatCurrency(incomeAfterLoan)}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Income Including Home Loan Interest</h4>
-                    <p className="text-lg font-semibold mt-1">{formatCurrency(incomeIncludingLoan)}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-medium text-muted-foreground">Final Total</h4>
-                    <p className={`text-lg font-semibold mt-1 ${finalTotal < 0 ? 'text-red-500' : 'text-green-500'}`}>
-                      {formatCurrency(finalTotal)}
-                    </p>
-                  </div>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-muted-foreground">Total Income Before Loan</span>
+                  <span className="font-semibold">{formatCurrency(totalIncomeBeforeLoan)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-muted-foreground">Income After Loan Applied</span>
+                  <span className="font-semibold">{formatCurrency(incomeAfterLoan)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2 border-b">
+                  <span className="text-sm text-muted-foreground">Income Including Home Loan Interest</span>
+                  <span className="font-semibold">{formatCurrency(incomeIncludingLoan)}</span>
+                </div>
+                <div className="flex justify-between items-center py-2">
+                  <span className="text-sm font-medium">Final Total</span>
+                  <span className={`text-lg font-bold ${finalTotal < 0 ? 'text-red-500' : 'text-green-600'}`}>
+                    {formatCurrency(finalTotal)}
+                  </span>
                 </div>
               </div>
             </CardContent>
           </Card>
         </div>
+
         {/* Income and Expenses Chart */}
         <div className="mt-6">
           <LandlordIncomeChart
@@ -636,9 +600,9 @@ export function LandlordIncomeCalculator() {
           />
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col items-start text-sm text-muted-foreground">
-        <p>Note: Final Income = (Rent + Tenant Paid Bills) - (All Expenses)</p>
-        <p>Home Loan Interest is calculated as {interestPercentage}% of the total Final Income</p>
+      <CardFooter className="flex flex-col items-start text-sm text-muted-foreground space-y-1">
+        <p>• Final Income = (Rent + Tenant Paid Bills) - (All Expenses)</p>
+        <p>• Home Loan Interest is calculated as {interestPercentage}% of the total Final Income</p>
       </CardFooter>
     </Card>
   )
